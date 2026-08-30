@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SS Mat Rague v0.0.1 — Malek Sepai Studio</title>
+<style>
+  :root{
+    --navy-deep:#0b1e38;
+    --navy-mid:#132a4a;
+    --twilight:#3a3f6b;
+    --dusk-rose:#a8567a;
+    --amber:#e8944f;
+    --brass:#c9a24b;
+    --cream:#f2e9d8;
+    --danger:#b3503f;
+    --good:#5c9c73;
+    --warn:#d9a441;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: radial-gradient(ellipse at 50% -10%, #16294a 0%, var(--navy-deep) 55%, #060f1e 100%);
+    color: var(--cream);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .hidden{ display:none !important; }
+  #app{ max-width:1560px; margin:0 auto; padding:0 0 40px; }
+
+  /* ---------- Loading ---------- */
+  .loading-overlay{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:var(--navy-deep); z-index:999;
+  }
+  .loading-inner{ text-align:center; }
+  .loading-ship{ font-size:42px; animation:bob 1.6s ease-in-out infinite; display:inline-block; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
+  .loading-inner p{ margin-top:10px; opacity:.7; letter-spacing:.05em; font-size:13px; }
+
+  /* ---------- Hero ---------- */
+  .hero{ position:relative; }
+  .hero svg{ display:block; width:100%; height:auto; max-height:300px; }
+  .hero-overlay{
+    position:absolute; top:6%; left:5%; max-width:70%;
+    background:linear-gradient(160deg, rgba(6,14,28,.62), rgba(6,14,28,0) 82%);
+    padding:18px 22px 26px; border-radius:0 0 20px 0;
+  }
+  .eyebrow{ margin:0 0 4px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--brass); opacity:.95; }
+  .ship-name{
+    margin:0; font-family:Georgia,'Iowan Old Style','Palatino Linotype','Times New Roman',serif;
+    font-size:clamp(26px,5vw,46px); letter-spacing:.03em; text-transform:uppercase; color:var(--cream);
+    text-shadow:0 1px 0 rgba(0,0,0,.4), 0 0 22px rgba(201,162,75,.35);
+  }
+  .tagline{ margin:6px 0 0; font-style:italic; color:var(--cream); opacity:.82; font-size:13.5px; }
+  .version-tag{ margin:6px 0 0; font-size:10px; letter-spacing:.14em; text-transform:uppercase; opacity:.45; }
+  .corner-btns{ position:absolute; top:14px; right:14px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .ghost-btn.muted{ opacity:.5; text-decoration:line-through; }
+
+  /* ---------- Promenade deck ---------- */
+  .promenade{ position:relative; margin:14px 20px 0; border-radius:14px; overflow:hidden; border:1px solid rgba(201,162,75,.25); }
+  .promenade svg{ display:block; width:100%; height:auto; max-height:150px; }
+  .promenade-caption{
+    position:absolute; bottom:8px; left:10px; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    opacity:.75; background:rgba(6,14,28,.55); padding:3px 9px; border-radius:20px; color:var(--cream);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:inherit; font-size:14px; font-weight:600; padding:10px 16px; border-radius:9px;
+    border:1px solid transparent; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+  }
+  .btn:focus-visible, .room-btn:focus-visible, .ghost-btn:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+  .btn.primary{ background:var(--amber); color:#241606; border-color:#b96f31; }
+  .btn.primary:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(232,148,79,.35); }
+  .btn.secondary{ background:transparent; color:var(--cream); border-color:rgba(242,233,216,.35); }
+  .btn.secondary:hover{ background:rgba(242,233,216,.08); transform:translateY(-2px); }
+  .btn.ghost{ background:transparent; color:rgba(242,233,216,.5); border-color:rgba(242,233,216,.15); cursor:default; }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+  .ghost-btn{
+    background:rgba(11,30,56,.55); color:var(--cream); border:1px solid rgba(201,162,75,.4);
+    border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; font-family:inherit;
+  }
+  .ghost-btn:hover{ background:rgba(11,30,56,.85); }
+
+  /* ---------- Status strips ---------- */
+  .status-strip, .resource-strip{ display:flex; flex-wrap:wrap; gap:10px; padding:16px 20px 0; }
+  .resource-strip{ padding-top:8px; }
+  .stat-pill{
+    background:rgba(19,42,74,.6); border:1px solid rgba(201,162,75,.25); border-radius:10px;
+    padding:8px 14px; display:flex; align-items:center; gap:8px; font-size:13px;
+  }
+  .stat-pill .label{ text-transform:uppercase; letter-spacing:.08em; font-size:10px; opacity:.6; }
+  .stat-pill .value{ font-weight:700; }
+  .pips .pip-empty{ opacity:.25; filter:grayscale(1); }
+  .stars{ display:inline-flex; gap:1px; }
+  .star-slot{ position:relative; display:inline-block; width:14px; }
+  .star-base{ color:rgba(242,233,216,.22); }
+  .star-fill{ position:absolute; top:0; left:0; overflow:hidden; white-space:nowrap; color:var(--brass); }
+
+  .resource-bar{
+    display:flex; align-items:center; gap:8px; background:rgba(19,42,74,.5);
+    border:1px solid rgba(201,162,75,.18); border-radius:10px; padding:7px 12px; font-size:12px; flex:1 1 190px;
+  }
+  .resource-bar .rb-label{ width:64px; opacity:.75; }
+  .rb-track{ flex:1; height:6px; background:rgba(255,255,255,.08); border-radius:4px; overflow:hidden; }
+  .rb-fill{ height:100%; background:var(--brass); border-radius:4px; }
+  .resource-bar.mid .rb-fill{ background:var(--warn); }
+  .resource-bar.low .rb-fill{ background:var(--danger); }
+  .rb-value{ width:46px; text-align:right; opacity:.8; font-variant-numeric:tabular-nums; }
+
+  /* ---------- Main grid ---------- */
+  .main-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,360px); gap:18px; padding:18px 20px 0; align-items:start; }
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    border-bottom:1px solid rgba(201,162,75,.25); padding-bottom:8px; margin-bottom:10px;
+  }
+  .panel-title.bare{ border-bottom:none; padding-bottom:0; margin:0; }
+  .panel-title{
+    font-family:Georgia,'Iowan Old Style','Palatino Linotype','Times New Roman',serif;
+    letter-spacing:.04em; text-transform:uppercase; font-size:15px; color:var(--brass); margin:0 0 10px;
+    border-bottom:1px solid rgba(201,162,75,.25); padding-bottom:8px;
+  }
+  .room-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+  .room-card{
+    background:linear-gradient(160deg, rgba(19,42,74,.75), rgba(11,30,56,.75));
+    border:1px solid rgba(201,162,75,.3); border-radius:12px; padding:14px; text-align:center;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .room-card:not(.disabled):hover{ transform:translateY(-4px); box-shadow:0 10px 22px rgba(0,0,0,.35); border-color:var(--brass); }
+  .room-card.disabled{ opacity:.45; }
+  .room-icon{ font-size:30px; }
+  .room-name{ font-family:Georgia,'Iowan Old Style','Palatino Linotype','Times New Roman',serif; margin:6px 0 4px; font-size:15px; letter-spacing:.02em; }
+  .room-desc{ font-size:11.5px; opacity:.65; margin:0 0 10px; line-height:1.4; min-height:32px; }
+  .room-btn{
+    width:100%; background:rgba(201,162,75,.14); border:1px solid rgba(201,162,75,.5); color:var(--cream);
+    border-radius:8px; padding:8px 10px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit;
+    display:flex; flex-direction:column; gap:2px; transition:background .15s ease;
+  }
+  .room-btn:hover:not(:disabled){ background:rgba(201,162,75,.28); }
+  .room-btn:disabled{ cursor:not-allowed; opacity:.5; }
+  .room-cost{ font-size:10.5px; opacity:.7; font-weight:400; }
+
+  .map-hint{ margin:-4px 0 10px; font-size:11.5px; opacity:.55; letter-spacing:.03em; }
+  .explore-frame{
+    position:relative; border:1px solid rgba(201,162,75,.3); border-radius:12px; overflow:hidden;
+    background:#0f2038; line-height:0;
+  }
+  #mapCanvas{ display:block; width:100%; height:auto; cursor:default; }
+  .interact-prompt{
+    position:absolute; left:50%; bottom:10px; transform:translateX(-50%);
+    background:rgba(6,14,28,.78); border:1px solid rgba(201,162,75,.5); color:var(--cream);
+    padding:6px 14px; border-radius:20px; font-size:12.5px; font-weight:600; white-space:nowrap;
+    pointer-events:none;
+  }
+  .touch-controls{
+    position:absolute; left:0; right:0; bottom:12px; display:flex; align-items:flex-end;
+    justify-content:space-between; padding:0 14px; pointer-events:none;
+  }
+  .dpad{
+    display:grid; grid-template-columns:repeat(3,34px); grid-template-rows:repeat(3,34px);
+    gap:2px; pointer-events:auto;
+  }
+  .dpad-btn{
+    grid-column:2; background:rgba(11,30,56,.72); border:1px solid rgba(201,162,75,.5); color:var(--cream);
+    border-radius:8px; font-size:14px; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:none;
+  }
+  .dpad-btn[data-dir="up"]{ grid-row:1; }
+  .dpad-btn[data-dir="left"]{ grid-row:2; grid-column:1; }
+  .dpad-btn[data-dir="down"]{ grid-row:2; }
+  .dpad-btn[data-dir="right"]{ grid-row:2; grid-column:3; }
+  .dpad-btn:active{ background:rgba(201,162,75,.35); }
+  .interact-btn{
+    pointer-events:auto; width:52px; height:52px; border-radius:50%; background:var(--amber);
+    color:#241606; border:1px solid #b96f31; font-weight:700; font-size:16px; cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,.35); user-select:none; -webkit-user-select:none; touch-action:none;
+  }
+  .interact-btn:active{ transform:scale(.94); }
+
+  /* On a mouse/trackpad machine the D-pad is just clutter over the scene — WASD
+     is right there. Only show it where touch is the primary input. */
+  @media (hover:hover) and (pointer:fine){
+    .touch-controls{ display:none; }
+  }
+
+  /* Expanded ("⛶") mode: the deck panel takes over the whole viewport so the
+     map can be as large as the screen allows. */
+  .deck-panel.expanded{
+    position:fixed; inset:0; z-index:900; margin:0; padding:10px 12px 14px;
+    background:radial-gradient(ellipse at 50% 0%, #16294a 0%, #0b1e38 60%, #060f1e 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    overflow:auto;
+  }
+  .deck-panel.expanded .panel-head{ width:100%; max-width:1100px; }
+  .deck-panel.expanded .map-hint{ width:100%; max-width:1100px; }
+  .deck-panel.expanded .explore-frame{ max-width:100%; }
+  .deck-panel.expanded #mapCanvas{
+    width:auto; height:calc(100vh - 132px);
+    max-width:calc(100vw - 34px); max-height:calc(100vh - 132px);
+  }
+
+  .log-panel{ background:rgba(11,30,56,.4); border:1px solid rgba(201,162,75,.2); border-radius:12px; padding:14px; max-height:520px; overflow-y:auto; }
+  .log-entries{ display:flex; flex-direction:column; gap:10px; }
+  .log-entry{ border-left:3px solid var(--brass); padding:2px 0 2px 10px; }
+  .log-entry p{ margin:2px 0 0; font-size:13px; line-height:1.45; opacity:.9; }
+  .log-entry .log-day{ font-size:10px; text-transform:uppercase; letter-spacing:.08em; opacity:.5; }
+  .log-entry.story{ border-left-color:var(--dusk-rose); }
+  .log-entry.finance{ border-left-color:var(--good); }
+  .log-entry.system{ border-left-color:var(--twilight); }
+  .log-entry.warn{ border-left-color:var(--danger); }
+  .log-empty{ opacity:.5; font-size:13px; font-style:italic; }
+  .log-panel::-webkit-scrollbar{ width:6px; }
+  .log-panel::-webkit-scrollbar-thumb{ background:rgba(201,162,75,.4); border-radius:3px; }
+
+  /* ---------- Action bar ---------- */
+  .action-bar{ display:flex; justify-content:center; gap:14px; padding:26px 20px 6px; }
+  .save-indicator{ text-align:center; font-size:11px; opacity:0; letter-spacing:.06em; color:var(--good); transition:opacity .3s ease; height:14px; margin:2px 0 0; }
+  .save-indicator.show{ opacity:.85; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(4,10,20,.72); backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px;
+  }
+  .modal-box{
+    background:linear-gradient(165deg, #1a2c4d, #0f2038); border:1px solid rgba(201,162,75,.4);
+    border-radius:16px; padding:26px 28px; max-width:480px; width:100%; max-height:85vh; overflow-y:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal-title{ font-family:Georgia,'Iowan Old Style','Palatino Linotype','Times New Roman',serif; letter-spacing:.03em; margin:0 0 12px; font-size:21px; color:var(--brass); }
+  .modal-body p{ line-height:1.6; font-size:14.5px; margin:0 0 10px; opacity:.92; }
+  .modal-body strong{ color:var(--amber); }
+  .modal-hint{ font-size:12.5px !important; opacity:.6 !important; font-style:italic; }
+  .modal-intro{ opacity:.75; font-size:13.5px !important; }
+  .modal-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; justify-content:flex-end; }
+
+  .report-finance{ display:grid; grid-template-columns:1fr auto; gap:5px 14px; font-size:13.5px; margin:14px 0; padding:12px 14px; background:rgba(0,0,0,.18); border-radius:10px; }
+  .report-net{ font-weight:700; border-top:1px solid rgba(242,233,216,.15); padding-top:6px; margin-top:2px; color:var(--amber); }
+
+  .upgrade-list{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .upgrade-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; background:rgba(0,0,0,.18); border-radius:10px; padding:10px 14px; }
+  .upgrade-name{ margin:0; font-weight:700; font-size:13.5px; }
+  .upgrade-desc{ margin:2px 0 0; font-size:11.5px; opacity:.65; }
+  .upgrade-btn{ flex-shrink:0; white-space:nowrap; }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--brass); color:#241606; padding:10px 18px; border-radius:30px;
+    font-size:13px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:1100;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:780px){
+    .main-grid{ grid-template-columns:1fr; }
+    .log-panel{ max-height:320px; }
+    .hero-overlay{ max-width:88%; }
+  }
+  @media (max-width:480px){
+    .status-strip, .resource-strip, .main-grid, .action-bar{ padding-left:12px; padding-right:12px; }
+    .promenade{ margin-left:12px; margin-right:12px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:.001ms !important; animation-iteration-count:1 !important;
+      transition-duration:.001ms !important; scroll-behavior:auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div id="loading" class="loading-overlay">
+    <div class="loading-inner">
+      <div class="loading-ship">🚢</div>
+      <p>Casting off…</p>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <header class="hero">
+      <svg viewBox="0 0 900 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The SS Mat Rague sailing at dusk">
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0b1e38"/>
+            <stop offset="32%" stop-color="#233763"/>
+            <stop offset="62%" stop-color="#7a4a6e"/>
+            <stop offset="83%" stop-color="#c97a53"/>
+            <stop offset="100%" stop-color="#e8b165"/>
+          </linearGradient>
+          <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2a4a55"/>
+            <stop offset="100%" stop-color="#0b1a22"/>
+          </linearGradient>
+        </defs>
+
+        <rect x="0" y="0" width="900" height="190" fill="url(#skyGrad)"/>
+
+        <g class="stars-group" fill="#f6ecd6">
+          <circle class="star" cx="40" cy="26" r="1.4"/>
+          <circle class="star" cx="95" cy="60" r="1"/>
+          <circle class="star" cx="150" cy="16" r="1.3"/>
+          <circle class="star" cx="205" cy="70" r="1"/>
+          <circle class="star" cx="260" cy="32" r="1.5"/>
+          <circle class="star" cx="320" cy="52" r="1"/>
+          <circle class="star" cx="120" cy="95" r="1.1"/>
+          <circle class="star" cx="700" cy="70" r="1.2"/>
+          <circle class="star" cx="750" cy="32" r="1"/>
+          <circle class="star" cx="810" cy="55" r="1.4"/>
+          <circle class="star" cx="860" cy="22" r="1"/>
+          <circle class="star" cx="640" cy="90" r="1.1"/>
+        </g>
+
+        <path class="gull" d="M140,50 q6,-7 12,0 q6,-7 12,0" fill="none" stroke="#f2e9d8" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/>
+        <path class="gull" d="M760,40 q5,-6 10,0 q5,-6 10,0" fill="none" stroke="#f2e9d8" stroke-width="1.3" stroke-linecap="round" opacity="0.5"/>
+        <path class="gull" d="M700,88 q4,-5 8,0 q4,-5 8,0" fill="none" stroke="#f2e9d8" stroke-width="1.2" stroke-linecap="round" opacity="0.45"/>
+
+        <rect x="0" y="184" width="900" height="76" fill="url(#seaGrad)"/>
+        <path class="wave" d="M0,196 Q30,190 60,196 T120,196 T180,196 T240,196 T300,196 T360,196 T420,196 T480,196 T540,196 T600,196 T660,196 T720,196 T780,196 T840,196 T900,196" fill="none" stroke="#cfe6de" stroke-opacity="0.22" stroke-width="1.4"/>
+        <path class="wave" d="M0,208 Q30,203 60,208 T120,208 T180,208 T240,208 T300,208 T360,208 T420,208 T480,208 T540,208 T600,208 T660,208 T720,208 T780,208 T840,208 T900,208" fill="none" stroke="#cfe6de" stroke-opacity="0.16" stroke-width="1.4"/>
+        <path class="wave" d="M0,222 Q30,217 60,222 T120,222 T180,222 T240,222 T300,222 T360,222 T420,222 T480,222 T540,222 T600,222 T660,222 T720,222 T780,222 T840,222 T900,222" fill="none" stroke="#cfe6de" stroke-opacity="0.12" stroke-width="1.4"/>
+
+        <g id="shipGroup">
+          <polygon points="322,178 615,178 636,184 630,198 322,198 304,190 310,180" fill="#182338" stroke="#c9a24b" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="345" y="140" width="250" height="38" rx="3" fill="#e9dcc0" stroke="#8a6f2f" stroke-width="1.4"/>
+          <rect x="400" y="116" width="120" height="26" rx="3" fill="#e9dcc0" stroke="#8a6f2f" stroke-width="1.4"/>
+
+          <circle cx="360" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+          <circle cx="386" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+          <circle cx="412" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+          <circle cx="438" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+          <circle cx="500" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+          <circle cx="526" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+          <circle cx="552" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+          <circle cx="578" cy="159" r="3.4" fill="#ffd77a" stroke="#3a2c1c" stroke-width="1"/>
+
+          <rect x="430" y="72" width="20" height="46" rx="5" fill="#7a2e2e" stroke="#2a1010" stroke-width="1.2"/>
+          <rect x="430" y="72" width="20" height="9" fill="#181010"/>
+          <rect x="468" y="72" width="20" height="46" rx="5" fill="#7a2e2e" stroke="#2a1010" stroke-width="1.2"/>
+          <rect x="468" y="72" width="20" height="9" fill="#181010"/>
+
+          <line x1="600" y1="116" x2="600" y2="92" stroke="#c9a24b" stroke-width="2"/>
+          <path d="M600,94 L618,99 L600,104 Z" fill="#e8944f"/>
+
+          <g class="smoke">
+            <ellipse cx="440" cy="64" rx="6" ry="4" fill="#dfe4e8" opacity="0.5"/>
+            <ellipse cx="444" cy="50" rx="8" ry="5" fill="#dfe4e8" opacity="0.35"/>
+            <ellipse cx="449" cy="34" rx="10" ry="6" fill="#dfe4e8" opacity="0.2"/>
+          </g>
+          <g class="smoke">
+            <ellipse cx="478" cy="64" rx="6" ry="4" fill="#dfe4e8" opacity="0.5"/>
+            <ellipse cx="482" cy="50" rx="8" ry="5" fill="#dfe4e8" opacity="0.35"/>
+            <ellipse cx="487" cy="34" rx="10" ry="6" fill="#dfe4e8" opacity="0.2"/>
+          </g>
+        </g>
+      </svg>
+
+      <div class="hero-overlay">
+        <p class="eyebrow">Malek Sepai Cruise Line presents</p>
+        <h1 class="ship-name">SS Mat Rague</h1>
+        <p class="tagline">Keep her steady. Keep them smiling.</p>
+        <p class="version-tag" id="versionTag"></p>
+      </div>
+      <div class="corner-btns">
+        <button id="musicBtn" class="ghost-btn" title="Toggle the ship's music (M)">♪ Music</button>
+        <button id="newVoyageBtn" class="ghost-btn" title="Start a new voyage">⟲ New Voyage</button>
+      </div>
+    </header>
+
+    <audio id="bgm" loop preload="auto">
+      <source src="ss-mat-rague-theme.mp3" type="audio/mpeg">
+    </audio>
+
+    <section class="promenade">
+      <svg viewBox="0 0 900 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Passengers and crew strolling the promenade deck">
+        <defs>
+          <linearGradient id="deckWoodGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6b4a34"/>
+            <stop offset="100%" stop-color="#432f21"/>
+          </linearGradient>
+          <pattern id="railingPattern" width="30" height="14" patternUnits="userSpaceOnUse">
+            <rect x="13" y="0" width="3" height="14" fill="var(--brass)" opacity="0.7"/>
+          </pattern>
+          <pattern id="plankPattern" width="60" height="16" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="16" x2="60" y2="16" stroke="#2c1e15" stroke-width="1" opacity="0.4"/>
+          </pattern>
+        </defs>
+
+        <rect x="0" y="0" width="900" height="30" fill="var(--dusk-rose)" opacity="0.35"/>
+        <line x1="0" y1="30" x2="900" y2="30" stroke="var(--brass)" stroke-width="2"/>
+        <rect x="0" y="30" width="900" height="14" fill="url(#railingPattern)"/>
+
+        <rect x="0" y="44" width="900" height="96" fill="url(#deckWoodGrad)"/>
+        <rect x="0" y="44" width="900" height="96" fill="url(#plankPattern)"/>
+
+        <g opacity="0.9">
+          <rect x="54" y="114" width="36" height="8" rx="3" fill="#cfa15a"/>
+          <rect x="46" y="98" width="10" height="16" rx="3" fill="#cfa15a" transform="rotate(-16 46 114)"/>
+        </g>
+        <g opacity="0.9">
+          <rect x="700" y="122" width="36" height="8" rx="3" fill="#cfa15a"/>
+          <rect x="692" y="106" width="10" height="16" rx="3" fill="#cfa15a" transform="rotate(-16 692 122)"/>
+        </g>
+
+        <line x1="820" y1="140" x2="820" y2="58" stroke="var(--brass)" stroke-width="2.5"/>
+        <circle cx="820" cy="54" r="14" fill="#ffd77a" opacity="0.22"/>
+        <circle class="lamp-glow" cx="820" cy="54" r="6" fill="#ffd77a"/>
+
+        <g id="promenadeFigures"></g>
+      </svg>
+      <span class="promenade-caption">The Promenade Deck</span>
+    </section>
+
+    <section class="status-strip" id="statusStrip"></section>
+    <section class="resource-strip" id="resourceStrip"></section>
+
+    <main class="main-grid">
+      <section class="deck-panel" id="deckPanel">
+        <div class="panel-head">
+          <h2 class="panel-title bare" id="mapTitle">Main Hall</h2>
+          <button id="expandMapBtn" class="ghost-btn" title="Expand the map to fill the screen (F)">⛶ Expand</button>
+        </div>
+        <p class="map-hint">WASD to move · E to use things and talk to people</p>
+        <div class="explore-frame">
+          <canvas id="mapCanvas" aria-label="A walkable deck of the SS Mat Rague — move with WASD and press E near something to interact with it" role="img"></canvas>
+          <p class="interact-prompt hidden" id="interactPrompt"></p>
+          <div class="touch-controls">
+            <div class="dpad">
+              <button class="dpad-btn" data-dir="up" aria-label="Move up">▲</button>
+              <button class="dpad-btn" data-dir="left" aria-label="Move left">◀</button>
+              <button class="dpad-btn" data-dir="down" aria-label="Move down">▼</button>
+              <button class="dpad-btn" data-dir="right" aria-label="Move right">▶</button>
+            </div>
+            <button class="interact-btn" id="touchInteractBtn" aria-label="Interact">E</button>
+          </div>
+        </div>
+      </section>
+      <aside class="log-panel">
+        <h2 class="panel-title">Captain's Log</h2>
+        <div class="log-entries" id="logEntries"></div>
+      </aside>
+    </main>
+
+    <footer class="action-bar">
+      <button id="directoryBtn" class="btn secondary">📋 Ship's Directory</button>
+      <button id="shipyardBtn" class="btn secondary">⚓ Visit the Shipyard</button>
+      <button id="endDayBtn" class="btn primary">🌙 End the Day</button>
+    </footer>
+    <p class="save-indicator" id="saveIndicator"></p>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div id="modalBox" class="modal-box" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+  <script>
+  /* ==========================================================================
+     SS MAT RAGUE — a cruise-ship management sim
+     Malek Sepai Studio
+
+     HOW THIS FILE IS ORGANISED (search for these header comments):
+       1. CONTENT DATA   — rooms, passenger requests, events, story beats, upgrades.
+                            This is almost certainly where you'll add new content.
+       2. STATE           — the shape of a save file, and the live `state` object.
+       3. STORAGE          — load/save using window.storage (persists between visits).
+       4. UTILITIES        — small helpers used everywhere.
+       5. RENDERING        — turns `state` into HTML, including the animated
+                            promenade-deck passenger/crew figures.
+       6. MODAL SYSTEM     — one reusable popup used for every dialog in the game.
+       7. ANIMATION        — GSAP flourishes, gated so the game still works without them.
+      7b. EXPLORATION      — the walkable maps: MAPS data, WASD/E input, collision,
+                            and the canvas draw loop. Add new maps here.
+      7c. MUSIC            — the looping background track and its mute toggle.
+       8. ACTIONS          — what happens when the player interacts with things
+                            (walking up + E, the Ship's Directory, or the footer buttons).
+       9. DAY RESOLUTION   — what happens when a day ends.
+      10. INIT             — boots the game on page load.
+
+     To add a new room, event, story beat, passenger request, or shipyard
+     upgrade: find the matching array in section 1 and add one more entry in
+     the same shape as its neighbours. Nothing else needs to change.
+  ========================================================================== */
+
+  /* ============================= 1. CONTENT DATA ============================= */
+
+  const BRIDGE_LINES = [
+    'Officer Rahim squints through the brass telescope. "Clear water ahead, Captain."',
+    'You trace the shipping lanes across the chart table, plotting a careful course.',
+    'The quartermaster keeps both hands steady on the wheel. "Steady as she goes, sir."'
+  ];
+  const ENGINE_LINES = [
+    "The stokers heave coal into the furnace. The deck hums beneath the great engines' heartbeat.",
+    'Chief Engineer Tan wipes soot from his brow and grins. "She\'s running beautifully, Captain."',
+    'Steam hisses through the pipes as the boilers roar back up to speed.'
+  ];
+  const GALLEY_LINES = [
+    'The scent of warm bread and roasted spice drifts through the corridors.',
+    'Cook Yusuf sends out trays of his famous curry. Passengers line up eagerly.',
+    'Silver trays clink in the dining hall as the evening service begins.'
+  ];
+  const DECK_LINES = [
+    'Brass fittings gleam as the crew polishes every railing to a shine.',
+    'Fresh linens, swept decks, and the smell of varnish — she looks her very best.',
+    'A crew member hums a tune while scrubbing the promenade deck spotless.'
+  ];
+  const LOUNGE_LINES = [
+    'A string trio strikes up in the Grand Lounge. Laughter spills onto the promenade.',
+    'Dancers twirl beneath the chandeliers as the band plays late into the night.',
+    'Passengers gather for cards and stories, the lounge warm with candlelight.'
+  ];
+
+  // Each room needs: id, name, icon, desc, actionLabel, cost (an object with
+  // "hours" plus optionally gold/food/fuel), a shortMessage for when the
+  // player can't afford it, and an action() that mutates `state` and returns
+  // a line of log text. The Purser's Office is the one exception — its
+  // action is handled specially in doRoom() because it opens a passenger
+  // request instead.
+  const ROOMS = [
+    {
+      id:'bridge', name:'The Bridge', icon:'🧭',
+      desc:'Chart a safe course and keep watch for hazards.',
+      actionLabel:'Chart the Course',
+      cost:{ hours:1 },
+      shortMessage:'Not enough hours left today.',
+      action:() => {
+        state.lookout += 1;
+        state.reputation = clamp(state.reputation+0.05,0,5);
+        return pickOne(BRIDGE_LINES);
+      }
+    },
+    {
+      id:'engine', name:'The Engine Room', icon:'⚙️',
+      desc:'Stoke the boilers to keep the ship running true.',
+      actionLabel:'Stoke the Boilers',
+      cost:{ hours:1, fuel:8 },
+      shortMessage:'Not enough coal in the bunkers.',
+      action:() => {
+        state.reputation = clamp(state.reputation+0.06,0,5);
+        return pickOne(ENGINE_LINES);
+      }
+    },
+    {
+      id:'galley', name:'The Galley', icon:'🍽️',
+      desc:'Prepare a proper meal for the passengers.',
+      actionLabel:'Prepare a Feast',
+      cost:{ hours:1, food:10 },
+      shortMessage:'Not enough provisions in the galley.',
+      action:() => {
+        state.happiness = clamp(state.happiness+7,0,100);
+        return pickOne(GALLEY_LINES);
+      }
+    },
+    {
+      id:'deck', name:'Deck & Cabins', icon:'🧹',
+      desc:'Polish, sweep, and mend — keep her looking her best.',
+      actionLabel:'Polish & Repair',
+      cost:{ hours:1 },
+      shortMessage:'Not enough hours left today.',
+      action:() => {
+        state.shipCondition = clamp(state.shipCondition+9,0,100);
+        state.happiness = clamp(state.happiness+2,0,100);
+        return pickOne(DECK_LINES);
+      }
+    },
+    {
+      id:'lounge', name:'The Grand Lounge', icon:'🎻',
+      desc:'Host music and merriment for the evening.',
+      actionLabel:'Host an Evening',
+      cost:{ hours:1, gold:12 },
+      shortMessage:"Not enough gold for tonight's entertainment.",
+      action:() => {
+        const bonus = state.upgrades.includes('orchestra') ? 4 : 0;
+        state.happiness = clamp(state.happiness+9+bonus,0,100);
+        state.reputation = clamp(state.reputation+0.08,0,5);
+        return pickOne(LOUNGE_LINES);
+      }
+    },
+    {
+      id:'purser', name:"Purser's Office", icon:'🎟️',
+      desc:"Hear out a passenger's request in person.",
+      actionLabel:'Greet Passengers',
+      cost:{ hours:1 },
+      shortMessage:'Not enough hours left today.',
+      action:null
+    }
+    // --- Add a new room here: give it a unique id, icon, cost, and an
+    //     action() that mutates `state` and returns a line of flavour text. ---
+  ];
+
+  // Passenger requests: the Purser's Office opens one of these at random.
+  // Each choice has its own effects and its own follow-up line.
+  const REQUESTS = [
+    {
+      id:'hat',
+      text: "Mrs. Halim can't find her favourite hat anywhere on B-Deck, and she's nearly in tears about it.",
+      choices:[
+        { label:'Send the crew to search', effects:{ happiness:5 }, result:'The crew turns the deck over and finds it wedged behind a chair. Mrs. Halim beams.' },
+        { label:"Replace it from the ship's boutique (15g)", effects:{ happiness:8, gold:-15 }, result:'A new hat, even finer than the last, is delivered to her cabin within the hour.' }
+      ]
+    },
+    {
+      id:'seasick',
+      text: 'A young boy named Faris is too seasick to join his family for dinner, and looks miserable about missing it.',
+      choices:[
+        { label:"Send the ship's doctor", effects:{ happiness:4 }, result:"The doctor settles him with a kind word and a steady hand. He's smiling within the hour." },
+        { label:'Have the galley prepare a tray (6 food)', effects:{ happiness:7, food:-6 }, result:'A special tray arrives at his cabin door. His mother thanks you personally the next morning.' }
+      ]
+    },
+    {
+      id:'anniversary',
+      text: 'An elderly couple, married forty years, mention quietly that this voyage is their anniversary gift to each other.',
+      choices:[
+        { label:'Arrange a private table by the window (10g)', effects:{ happiness:6, gold:-10, reputation:0.1 }, result:"Candlelight, the sea outside the glass, and forty years between them. They don't stop smiling all evening." },
+        { label:'Simply wish them well', effects:{ happiness:3 }, result:"They don't need anything grand — just each other, and the sea." }
+      ]
+    },
+    {
+      id:'curious',
+      text: 'A young passenger asks whether the SS Mat Rague could really cross the whole ocean without any trouble. You find yourself pausing before you answer.',
+      choices:[
+        { label:'Reassure her with confidence', effects:{ happiness:4 }, result:'She skips off, satisfied, to tell her friends the captain himself said so.' },
+        { label:'Tell her the truth, gently', effects:{ happiness:3, reputation:0.1 }, result:'"The sea always has surprises," you say, "but a good crew is ready for anything." She seems to trust the ship more for the honesty.' }
+      ]
+    }
+    // --- Add a new passenger request here: { id, text, choices:[{label,effects,result}, {label,effects,result}] } ---
+  ];
+
+  // Random daily events. pickEvent() builds a weighted list from whichever
+  // candidates currently qualify, then EVENT_RESOLVERS[id]() produces the
+  // actual text and effects (some branch on state, like storm/iceberg safety).
+  function pickEvent(){
+    const candidates = [
+      { id:'calm', weight:26 },
+      { id:'breeze', weight:20 }
+    ];
+    if (state.day >= 2) candidates.push({ id:'storm', weight:16 });
+    if (state.day >= 4) candidates.push({ id:'iceberg', weight:9 });
+    if (state.reputation >= 4) candidates.push({ id:'press', weight:10 });
+    if (!state.actedToday.includes('engine') && state.fuel < 25) candidates.push({ id:'hiccup', weight:10 });
+
+    const total = candidates.reduce((s,c) => s+c.weight, 0);
+    let r = Math.random()*total;
+    for (const c of candidates){
+      if (r < c.weight) return c;
+      r -= c.weight;
+    }
+    return candidates[0];
+  }
+
+  const EVENT_RESOLVERS = {
+    calm: () => ({
+      text: pickOne([
+        'The sea lies flat as glass tonight. Passengers linger on deck to watch the stars come out.',
+        'A quiet day at sea. The SS Mat Rague cuts smoothly through calm water.',
+        "Nothing much happens today — and after a voyage like this one, that's a small mercy."
+      ]),
+      effects:{}
+    }),
+    breeze: () => ({
+      text: pickOne([
+        "A gentle breeze carries salt air across the deck. It's a fine night for the voyage.",
+        'Sunlight and sea spray — passengers spend the afternoon leaning on the rail, watching the water.'
+      ]),
+      effects:{ happiness:2 }
+    }),
+    storm: () => {
+      if (state.lookout >= 2){
+        return {
+          text: 'Storm clouds roll in, but the bridge crew already changed course hours ago. You ride out a little rain and nothing more.',
+          effects:{ shipCondition:-3 }
+        };
+      }
+      return {
+        text: 'A storm catches the SS Mat Rague unprepared. Waves crash over the bow through the night.',
+        effects:{ shipCondition:-12, happiness:-6 }
+      };
+    },
+    iceberg: () => {
+      const safe = state.lookout >= 2 || state.upgrades.includes('reinforcedHull');
+      if (safe){
+        return {
+          text: '"Ice ahead!" the lookout calls. The wheel spins hard to port, and the SS Mat Rague slips past with yards to spare. On deck, someone lets out a nervous laugh.',
+          effects:{ reputation:0.15 }
+        };
+      }
+      return {
+        text: "A low grinding shudders through the hull as ice scrapes along the SS Mat Rague's side. A glancing blow — but repairs won't come cheap.",
+        effects:{ shipCondition:-14, gold:-60 }
+      };
+    },
+    press: () => ({
+      text: 'A travel journalist aboard writes glowingly of the voyage for the papers back home. Bookings for next season tick upward.',
+      effects:{ gold:80 }
+    }),
+    hiccup: () => ({
+      text: 'The engines cough and sputter in the night. Chief Tan promises to keep a closer eye on the boilers tomorrow.',
+      effects:{ fuel:-5, shipCondition:-2 }
+    })
+    // --- Add a new event: 1) add a weighted candidate in pickEvent(), 2) add a matching resolver function here. ---
+  };
+
+  // Story beats fire once, on a specific day. Use `body` for static HTML, or
+  // `bodyFn` for text that depends on state. Leave `choices` null for a
+  // beat that just needs a "Continue" button.
+  const STORY_BEATS = [
+    {
+      id:'quietPassenger', day:3, title:'A Quiet Request',
+      body: `<p>A passenger travelling alone asks for a moment of your time before dinner. She doesn't say why — only that she'd like to see the bridge, "just once, before we reach the other side."</p>`,
+      choices:[
+        { label:'Grant her a few minutes on the bridge', effects:{ happiness:6 }, result:'She watches the horizon a long while, then thanks you and returns to her cabin — quieter, but somehow lighter.' },
+        { label:'Explain the bridge is crew-only', effects:{ reputation:0.05 }, result:'She nods, understanding. But something in her expression stays with you the rest of the day.' }
+      ]
+    },
+    {
+      id:'weekOne', day:7, title:'One Week at Sea',
+      bodyFn: () => state.reputation >= 3.5
+        ? '<p>A full week aboard, and the SS Mat Rague hums with good spirits. Word has it passengers are already writing home about the voyage.</p>'
+        : "<p>A full week aboard, and a few tired grumbles have started reaching your ears. There's still time to turn things around.</p>",
+      choices:null
+    },
+    {
+      id:'halfwayGala', day:14, title:'The Halfway Gala',
+      body: `<p>The crew requests permission to host a Halfway Gala — a proper celebration for two weeks well sailed.</p>`,
+      choices:[
+        { label:'Approve it in full (60g)', effects:{ gold:-60, happiness:15, reputation:0.2 }, result:'Streamers, music, and laughter fill the Grand Lounge long past midnight.' },
+        { label:'Keep it modest (20g)', effects:{ gold:-20, happiness:7 }, result:'A quieter toast is raised on deck. Simple, but sincere.' }
+      ]
+    }
+    // --- Add a new story beat here: { id, day, title, body (or bodyFn), choices (or null) } ---
+    // Example for Day 21: { id:'threeWeeks', day:21, title:'Three Weeks Out', body:'<p>...</p>', choices:null }
+  ];
+
+  // Shipyard upgrades. apply() runs once, immediately, on purchase.
+  const UPGRADES = [
+    { id:'reinforcedHull', name:'Reinforced Hull Plating', cost:300, desc:'Strengthens the hull against storms and ice — hazard damage is cut significantly.', apply:() => { state.shipCondition = clamp(state.shipCondition+5,0,100); } },
+    { id:'lifeboats', name:'Extra Lifeboats', cost:200, desc:"A comforting sight for nervous passengers, and required by the harbourmaster's new safety code.", apply:() => { state.reputation = clamp(state.reputation+0.3,0,5); } },
+    { id:'pantry', name:'Bigger Pantry', cost:150, desc:'Expands cold storage, so the galley never runs thin.', apply:() => { state.foodMax += 40; state.food = clamp(state.food+40,0,state.foodMax); } },
+    { id:'bunkers', name:'Expanded Coal Bunkers', cost:150, desc:'More room to stock fuel between ports.', apply:() => { state.fuelMax += 40; state.fuel = clamp(state.fuel+40,0,state.fuelMax); } },
+    { id:'orchestra', name:'Hire a Larger Ensemble', cost:250, desc:'A fuller sound for the Grand Lounge — evenings feel grander.', apply:() => {} },
+    { id:'cabins', name:'B-Deck Cabin Expansion', cost:400, desc:'More berths means more passengers — and more fares.', apply:() => { state.passengersMax += 15; } }
+    // --- Add a new upgrade here: { id, name, cost, desc, apply() } ---
+  ];
+
+  /* ================================ 2. STATE ================================= */
+
+  function defaultState(){
+    return {
+      day:1,
+      gold:500,
+      reputation:3.0,
+      hours:4, hoursMax:4,
+      shipCondition:82,
+      food:55, foodMax:100,
+      fuel:55, fuelMax:100,
+      happiness:68,
+      passengers:42, passengersMax:55,
+      lookout:0,
+      upgrades:[],
+      storyFlags:{},
+      actedToday:[],
+      log:[],
+      currentMap:'mainHall',
+      npcTalks:{},     // who you've already spoken with today (cleared each morning)
+      friendship:{},   // running tally per person, kept for the whole voyage
+      musicOn:true
+    };
+  }
+
+  let state = defaultState();
+  // Bump this on every release, and keep it matching the filename
+  // (ss-mat-rague-v0.0.1.html). It is stamped into the page title, shown under
+  // the ship's name on the banner, and written into each save file.
+  const GAME_VERSION = '0.0.1';
+
+  const SAVE_KEY = 'ss_mat_rague_save_v1';
+
+  /* =============================== 3. STORAGE ================================ */
+
+  async function loadGame(){
+    try{
+      const res = await window.storage.get(SAVE_KEY);
+      if (res && res.value){
+        state = Object.assign(defaultState(), JSON.parse(res.value));
+        return true;
+      }
+      return false;
+    }catch(e){
+      return false; // no save yet, or storage unavailable — start fresh
+    }
+  }
+
+  async function saveGame(){
+    try{
+      state.version = GAME_VERSION;
+      await window.storage.set(SAVE_KEY, JSON.stringify(state), false);
+      flashSaveIndicator();
+    }catch(e){
+      console.error('SS Mat Rague: save failed', e);
+    }
+  }
+
+  /* ============================== 4. UTILITIES ================================ */
+
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function pickOne(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function addLog(text, type){
+    state.log.push({ day:state.day, text, type: type || 'event' });
+    if (state.log.length > 200) state.log.shift();
+  }
+
+  function applyEffects(effects){
+    if (!effects) return;
+    if (effects.gold) state.gold += effects.gold;
+    if (effects.happiness) state.happiness = clamp(state.happiness+effects.happiness,0,100);
+    if (effects.shipCondition) state.shipCondition = clamp(state.shipCondition+effects.shipCondition,0,100);
+    if (effects.reputation) state.reputation = clamp(state.reputation+effects.reputation,0,5);
+    if (effects.fuel) state.fuel = clamp(state.fuel+effects.fuel,0,state.fuelMax);
+    if (effects.food) state.food = clamp(state.food+effects.food,0,state.foodMax);
+  }
+
+  /* ============================== 5. RENDERING ================================= */
+
+  const statusStripEl = document.getElementById('statusStrip');
+  const resourceStripEl = document.getElementById('resourceStrip');
+  const logEntriesEl = document.getElementById('logEntries');
+  const toastEl = document.getElementById('toast');
+  const saveIndicatorEl = document.getElementById('saveIndicator');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalBox = document.getElementById('modalBox');
+
+  function renderStars(rep){
+    let html = `<span class="stars" title="${rep.toFixed(1)} / 5 reputation">`;
+    for (let i=0;i<5;i++){
+      const fill = Math.max(0, Math.min(1, rep-i))*100;
+      html += `<span class="star-slot"><span class="star-base">★</span><span class="star-fill" style="width:${fill}%">★</span></span>`;
+    }
+    return html + '</span>';
+  }
+
+  function renderBar(icon,label,value,max){
+    const pct = Math.max(0, Math.min(100, Math.round((value/max)*100)));
+    const level = pct < 30 ? 'low' : pct < 60 ? 'mid' : 'good';
+    const valueText = max === 100 ? `${Math.round(value)}%` : `${Math.round(value)}/${max}`;
+    return `<div class="resource-bar ${level}">
+      <span class="rb-icon">${icon}</span>
+      <span class="rb-label">${label}</span>
+      <span class="rb-track"><span class="rb-fill" style="width:${pct}%"></span></span>
+      <span class="rb-value">${valueText}</span>
+    </div>`;
+  }
+
+  function renderStatusStrip(){
+    let pips = '';
+    for (let i=0;i<state.hoursMax;i++){
+      pips += i < state.hours ? '<span class="pip">⏳</span>' : '<span class="pip pip-empty">⏳</span>';
+    }
+    statusStripEl.innerHTML = `
+      <div class="stat-pill"><span class="label">Day</span><span class="value">${state.day}</span></div>
+      <div class="stat-pill"><span class="label">Gold</span><span class="value">🪙 ${state.gold}</span></div>
+      <div class="stat-pill">${renderStars(state.reputation)}</div>
+      <div class="stat-pill"><span class="label">Hours</span><span class="value pips">${pips}</span></div>
+      <div class="stat-pill"><span class="label">Passengers</span><span class="value">👥 ${state.passengers}/${state.passengersMax}</span></div>
+    `;
+  }
+
+  function renderResourceStrip(){
+    resourceStripEl.innerHTML =
+      renderBar('🛠️','Condition', state.shipCondition, 100) +
+      renderBar('🍞','Food', state.food, state.foodMax) +
+      renderBar('⛽','Fuel', state.fuel, state.fuelMax) +
+      renderBar('😊','Happiness', state.happiness, 100);
+  }
+
+  function renderLog(){
+    const entries = state.log.slice(-40).slice().reverse();
+    logEntriesEl.innerHTML = entries.length
+      ? entries.map(e => `<div class="log-entry ${e.type}"><span class="log-day">Day ${e.day}</span><p>${e.text}</p></div>`).join('')
+      : '<p class="log-empty">The log is empty. Set sail, Captain.</p>';
+  }
+
+  // ---- Promenade deck: small silhouette figures strolling the deck. ----
+  // Deliberately abstract (no faces, no skin tones) — flat coat-and-hat
+  // silhouettes in the style of old ocean-liner travel posters, in the same
+  // spirit as Stardew's small, simple NPC sprites rather than detailed
+  // portraits. Figure count follows `state.passengers`; palette and walking
+  // speed follow `state.happiness`, so a gloomier ship visibly looks it.
+  const PASSENGER_COLORS = ['#7a2e3d','#2f5d4f','#8a6f2f','#3a4a7a','#6b3f6b','#4f7a7a','#8a4a2f'];
+  const MUTED_COLORS = ['#5a5248','#4a4f52','#57544a','#4a4f58','#524a52','#494f4f','#57504a'];
+  const CREW_COLOR = '#e9dcc0';
+  const SILHOUETTE_DARK = '#241a12';
+
+  function moodTier(){
+    if (state.happiness >= 75) return 'high';
+    if (state.happiness >= 40) return 'mid';
+    return 'low';
+  }
+  function promenadeFigureCount(){
+    return clamp(Math.round(state.passengers/8), 3, 9);
+  }
+
+  function buildFigureSVG(id, x, laneY, color, hasHat){
+    return `<g class="promenade-figure" id="${id}" transform="translate(${x},${laneY})">
+      <g class="promenade-bob">
+        <ellipse cx="0" cy="-1" rx="6" ry="1.6" fill="#000" opacity="0.18"/>
+        <rect x="-4" y="-3.4" width="3" height="3" rx="1" fill="${SILHOUETTE_DARK}"/>
+        <rect x="1" y="-3.4" width="3" height="3" rx="1" fill="${SILHOUETTE_DARK}"/>
+        <path d="M-5,-3 L-6,-17 Q-6,-21 0,-21 Q6,-21 6,-17 L5,-3 Z" fill="${color}"/>
+        <circle cx="0" cy="-24" r="3.4" fill="${SILHOUETTE_DARK}"/>
+        ${hasHat ? `<ellipse cx="0" cy="-26.4" rx="4.6" ry="1.3" fill="${color}"/>` : ''}
+      </g>
+    </g>`;
+  }
+
+  let promenadeKey = null;
+  let promenadeTweens = [];
+
+  function renderPromenade(){
+    const tier = moodTier();
+    const n = promenadeFigureCount();
+    const key = n + '-' + tier;
+    if (key === promenadeKey) return; // nothing meaningful changed — leave the current stroll uninterrupted
+    promenadeKey = key;
+
+    promenadeTweens.forEach(t => t.kill());
+    promenadeTweens = [];
+
+    const group = document.getElementById('promenadeFigures');
+    if (!group) return;
+
+    const palette = tier === 'low' ? MUTED_COLORS : PASSENGER_COLORS;
+    const lanes = [104, 116, 128];
+    const speedBase = tier === 'high' ? 11 : tier === 'low' ? 22 : 16;
+
+    let html = '';
+    const specs = [];
+    for (let i = 0; i < n; i++){
+      const laneY = lanes[i % lanes.length];
+      const dir = i % 2 === 0 ? 1 : -1;
+      const startX = dir === 1 ? -20 - Math.random()*60 : 920 + Math.random()*60;
+      const endX = dir === 1 ? 920 + Math.random()*60 : -20 - Math.random()*60;
+      const color = i === 0 ? CREW_COLOR : palette[i % palette.length];
+      const hasHat = i !== 0 && Math.random() > 0.4;
+      const id = 'pf' + i;
+      html += buildFigureSVG(id, startX, laneY, color, hasHat);
+      specs.push({
+        id, startX, endX,
+        duration: speedBase + Math.random()*6,
+        delay: Math.random()*4,
+        bobAmp: tier === 'low' ? 1 : tier === 'high' ? 2.4 : 1.6,
+        bobSpeed: tier === 'low' ? 0.42 : tier === 'high' ? 0.22 : 0.3
+      });
+    }
+    group.innerHTML = html;
+
+    if (typeof gsap === 'undefined' || prefersReducedMotion) return; // figures still show, just standing still
+
+    specs.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (!el) return;
+      const bobEl = el.querySelector('.promenade-bob');
+      promenadeTweens.push(gsap.to(el, { x: s.endX - s.startX, duration: s.duration, delay: s.delay, ease:'none', repeat:-1 }));
+      promenadeTweens.push(gsap.to(bobEl, { y:-s.bobAmp, duration:s.bobSpeed, repeat:-1, yoyo:true, ease:'sine.inOut', delay:Math.random() }));
+    });
+  }
+
+  function render(){
+    renderStatusStrip();
+    renderResourceStrip();
+    renderLog();
+    renderPromenade();
+    const firstEntry = logEntriesEl.querySelector('.log-entry');
+    if (firstEntry) anim(firstEntry, { opacity:1, x:0, duration:.35 }, { opacity:0, x:-10 });
+  }
+
+  /* ============================= 6. MODAL SYSTEM ================================ */
+
+  function openModal(title, bodyHTML, buttons){
+    modalBox.innerHTML = `
+      <h2 class="modal-title">${title}</h2>
+      <div class="modal-body">${bodyHTML}</div>
+      <div class="modal-actions"></div>
+    `;
+    const actionsEl = modalBox.querySelector('.modal-actions');
+    buttons.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = 'btn ' + (b.primary ? 'primary' : 'secondary');
+      btn.textContent = b.label;
+      btn.addEventListener('click', b.onClick);
+      actionsEl.appendChild(btn);
+    });
+    modalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    anim(modalOverlay, { opacity:1, duration:.2 }, { opacity:0 });
+    anim(modalBox, { opacity:1, scale:1, y:0, duration:.32, ease:'back.out(1.6)' }, { opacity:0, scale:.94, y:14 });
+  }
+
+  function closeModal(){
+    anim(modalBox, { opacity:0, scale:.94, y:14, duration:.18 });
+    anim(modalOverlay, { opacity:0, duration:.18, onComplete:() => { modalOverlay.classList.add('hidden'); document.body.style.overflow = mapExpanded ? 'hidden' : ''; } });
+  }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.remove('hidden');
+    anim(toastEl, { opacity:1, y:0, duration:.25 }, { opacity:0, y:10 });
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => {
+      anim(toastEl, { opacity:0, y:10, duration:.25, onComplete:() => toastEl.classList.add('hidden') });
+    }, 2200);
+  }
+
+  function flashSaveIndicator(){
+    saveIndicatorEl.textContent = 'Voyage saved ✓';
+    saveIndicatorEl.classList.add('show');
+    clearTimeout(flashSaveIndicator._t);
+    flashSaveIndicator._t = setTimeout(() => saveIndicatorEl.classList.remove('show'), 1800);
+  }
+
+  /* ============================== 7. ANIMATION ================================= */
+
+  const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  // Every animated transition in the game goes through anim(), so that a
+  // failed GSAP load (or a reduced-motion preference) just snaps straight to
+  // the end state instead of breaking anything.
+  function anim(target, to, from){
+    if (typeof gsap === 'undefined' || prefersReducedMotion){
+      if (target && to) Object.assign(target.style, { opacity: to.opacity !== undefined ? to.opacity : '', transform:'' });
+      if (typeof to?.onComplete === 'function') to.onComplete();
+      return;
+    }
+    return from ? gsap.fromTo(target, from, to) : gsap.to(target, to);
+  }
+
+  function initHeroAnimations(){
+    if (typeof gsap === 'undefined' || prefersReducedMotion) return;
+    gsap.utils.toArray('.star').forEach((el,i) => {
+      gsap.to(el, { opacity:0.15+Math.random()*0.3, duration:1.5+Math.random()*2, repeat:-1, yoyo:true, delay:i*0.15, ease:'sine.inOut' });
+    });
+    gsap.to('.smoke', { y:-34, opacity:0, scale:1.5, transformOrigin:'center', duration:3.2, repeat:-1, stagger:0.6, ease:'power1.out' });
+    gsap.to('#shipGroup', { y:5, duration:2.6, repeat:-1, yoyo:true, ease:'sine.inOut' });
+    gsap.to('.wave', { x:14, duration:4.2, repeat:-1, yoyo:true, ease:'sine.inOut', stagger:0.4 });
+    gsap.to('.lamp-glow', { opacity:0.55, r:5, duration:1.8, repeat:-1, yoyo:true, ease:'sine.inOut' });
+  }
+
+  /* ============================= 7b. EXPLORATION ================================= */
+  // A walkable top-down scene per location. Move with WASD (or the on-screen
+  // D-pad), press E near something labelled to interact. Interactables of type
+  // "room" call doRoom() with an existing ROOMS id, so all the cost/effect/
+  // flavour logic from section 1 is reused as-is — only the trigger changed
+  // from a click to walking up and pressing E.
+  //
+  // TO ADD A NEW MAP: add a key to MAPS with width/height, wallThickness,
+  // floor, obstacles (solid, {x,y,w,h,type} — `type` picks a draw routine),
+  // decor (non-solid floor dressing), lights, interactables, and spawn. Then
+  // point a door-type interactable at it via targetMap/targetSpawn — e.g. once
+  // a real Engine Room map exists, change Main Hall's "engine" entry from
+  // {type:'room', roomId:'engine'} to {type:'door', targetMap:'engineRoom'}.
+  //
+  // TO ADD AN NPC: add an entry to NPCS[mapId]. `lines()` returns an array of
+  // possible things to say; whichever fits the current state is picked at
+  // random, so NPCs react to how the voyage is actually going.
+
+  const MAPS = {
+    mainHall: {
+      name: 'Main Hall',
+      width: 900, height: 560, wallThickness: 26,
+      floor: { base:'#4a3524', plank:'#3d2b1d', style:'parquet' },
+      wallColor: '#152a44',
+      obstacles: [
+        { x:375, y:150, w:150, h:200, type:'stairs' },
+        { x:310, y:165, w:30, h:30, type:'palm' },
+        { x:560, y:165, w:30, h:30, type:'palm' },
+        { x:44,  y:380, w:60, h:22, type:'bench' },
+        { x:796, y:380, w:60, h:22, type:'bench' },
+        { x:170, y:440, w:74, h:26, type:'table' },
+        { x:656, y:440, w:74, h:26, type:'table' }
+      ],
+      decor: [
+        { type:'rug', x:370, y:400, w:160, h:110, color:'#6b2c3a' },
+        { type:'runner', x:110, y:250, w:680, h:34 }
+      ],
+      lights: [
+        { x:450, y:230, r:200, color:'255,214,140', alpha:0.20 },
+        { x:150, y:460, r:120, color:'255,196,120', alpha:0.13 },
+        { x:750, y:460, r:120, color:'255,196,120', alpha:0.13 }
+      ],
+      portholes: [ {side:'left', at:150}, {side:'left', at:430}, {side:'right', at:150}, {side:'right', at:430} ],
+      interactables: [
+        { id:'purser', type:'room', roomId:'purser', x:95, y:170, icon:'🎟️', label:"Purser's Office", shape:'desk' },
+        { id:'toBoiler', type:'door', targetMap:'boilerRoom', targetSpawn:{x:390,y:380}, x:140, y:505, icon:'⚙️', label:'Boiler Room', shape:'door' },
+        { id:'toSaloon', type:'door', targetMap:'diningSaloon', targetSpawn:{x:410,y:420}, x:760, y:505, icon:'🍽️', label:'Dining Saloon', shape:'door' },
+        { id:'lounge', type:'room', roomId:'lounge', x:852, y:190, icon:'🎻', label:'Grand Lounge', shape:'door' },
+        { id:'toBerths', type:'door', targetMap:'berths', targetSpawn:{x:380,y:380}, x:852, y:380, icon:'🛏️', label:'Passenger Berths', shape:'door' },
+        { id:'clock',  type:'clock', x:280, y:110, icon:'🕰️', label:'The Grand Clock', shape:'none' },
+        { id:'toCaptain', type:'door', targetMap:'captainsRoom', targetSpawn:{x:300,y:320}, x:450, y:140, icon:'🧭', label:"Captain's Room", shape:'none' }
+      ],
+      spawn: { x:450, y:500 }
+    },
+    captainsRoom: {
+      name: "Captain's Room",
+      width: 600, height: 400, wallThickness: 24,
+      floor: { base:'#3b2b3f', plank:'#31243a', style:'planks' },
+      wallColor: '#16233d',
+      obstacles: [
+        { x:440, y:280, w:38, h:38, type:'wheel' },
+        { x:290, y:50,  w:56, h:26, type:'bookshelf' },
+        { x:500, y:230, w:26, h:26, type:'globe' }
+      ],
+      decor: [
+        { type:'rug', x:210, y:170, w:170, h:110, color:'#2f5d4f' }
+      ],
+      lights: [
+        { x:160, y:130, r:140, color:'255,206,130', alpha:0.20 },
+        { x:450, y:120, r:130, color:'255,206,130', alpha:0.16 }
+      ],
+      window: { x:200, y:0, w:200 },
+      interactables: [
+        { id:'bridge', type:'room', roomId:'bridge', x:150, y:120, icon:'🧭', label:'Chart Table', shape:'charttable' },
+        { id:'shipyard', type:'shipyard', x:460, y:110, icon:'⚓', label:'Blueprint Cabinet', shape:'cabinet' },
+        { id:'sleep', type:'sleep', x:140, y:300, icon:'🛏️', label:'Turn In for the Night', shape:'bed' },
+        { id:'logbook', type:'logbook', x:300, y:200, icon:'📖', label:"Ship's Logbook", shape:'lectern' },
+        { id:'toMainHall', type:'door', targetMap:'mainHall', targetSpawn:{x:450,y:110}, x:300, y:358, icon:'🚪', label:'Main Hall', shape:'door' }
+      ],
+      spawn: { x:300, y:320 }
+    },
+    boilerRoom: {
+      name: 'Boiler Room',
+      width: 820, height: 480, wallThickness: 26,
+      floor: { base:'#332924', plank:'#2a211d', style:'iron' },
+      wallColor: '#241a16',
+      obstacles: [
+        { x:110, y:26,  w:600, h:64, type:'furnaces' },
+        { x:340, y:224, w:140, h:92, type:'machine' },
+        { x:80,  y:310, w:66,  h:48, type:'coal' },
+        { x:674, y:310, w:66,  h:48, type:'coal' },
+        { x:120, y:180, w:44,  h:26, type:'barrow' },
+        { x:660, y:180, w:44,  h:26, type:'barrow' }
+      ],
+      decor: [
+        { type:'grate', x:200, y:150, w:420, h:40 }
+      ],
+      lights: [
+        { x:410, y:112, r:260, color:'255,140,60', alpha:0.26 },
+        { x:120, y:400, r:120, color:'255,170,90', alpha:0.12 },
+        { x:700, y:400, r:120, color:'255,170,90', alpha:0.12 }
+      ],
+      interactables: [
+        { id:'engine', type:'room', roomId:'engine', x:410, y:104, icon:'⚙️', label:'Stoke the Boilers', shape:'none' },
+        { id:'gauge', type:'gauge', x:52, y:210, icon:'🌡️', label:'Pressure Gauge', shape:'gauge' },
+        { id:'bunkerHatch', type:'flavor', x:770, y:210, icon:'🪣', label:'Coal Bunker Hatch', shape:'hatch',
+          text: () => state.fuel < 25
+            ? '<p>You haul the hatch open. The bunker beyond is nearly bare — a thin black scree over bare steel, and the shovels scraping for it.</p>'
+            : '<p>You haul the hatch open. Coal is heaped to the deckhead beyond, glittering faintly where the furnace light finds it.</p>' },
+        { id:'toMainHallB', type:'door', targetMap:'mainHall', targetSpawn:{x:180,y:495}, x:410, y:438, icon:'🚪', label:'Main Hall', shape:'door' }
+      ],
+      spawn: { x:410, y:396 }
+    },
+    diningSaloon: {
+      name: 'Dining Saloon',
+      width: 860, height: 520, wallThickness: 26,
+      floor: { base:'#e2d3b4', plank:'#4a3524', style:'tile' },
+      wallColor: '#1a3350',
+      obstacles: [
+        { x:110, y:170, w:66, h:66, type:'roundtable' },
+        { x:262, y:170, w:66, h:66, type:'roundtable' },
+        { x:110, y:340, w:66, h:66, type:'roundtable' },
+        { x:262, y:340, w:66, h:66, type:'roundtable' },
+        { x:620, y:112, w:100, h:64, type:'piano' },
+        { x:730, y:400, w:82,  h:30, type:'sideboard' },
+        { x:452, y:186, w:30,  h:30, type:'palm' },
+        { x:452, y:330, w:30,  h:30, type:'palm' }
+      ],
+      decor: [
+        { type:'rug', x:596, y:196, w:190, h:120, color:'#2f4a6b' },
+        { type:'runner', x:120, y:270, w:300, h:34 }
+      ],
+      lights: [
+        { x:220, y:260, r:180, color:'255,224,170', alpha:0.22 },
+        { x:660, y:190, r:180, color:'255,214,150', alpha:0.20 },
+        { x:430, y:440, r:140, color:'255,214,150', alpha:0.14 }
+      ],
+      portholes: [ {side:'left', at:120}, {side:'left', at:400}, {side:'right', at:300} ],
+      interactables: [
+        { id:'piano', type:'piano', x:706, y:200, icon:'🎹', label:'The Grand Piano', shape:'none' },
+        { id:'galley', type:'room', roomId:'galley', x:800, y:250, icon:'🍽️', label:'Serving Hatch', shape:'servinghatch' },
+        { id:'topTable', type:'flavor', x:600, y:430, icon:'🥂', label:"The Captain's Table", shape:'roundcloth',
+          text: () => state.happiness >= 70
+            ? "<p>The captain's table is laid for the evening — folded linen, polished silver, a card at every place. Somebody has put fresh flowers out without being asked.</p>"
+            : '<p>The captain\'s table is laid, though a little sparely tonight. The silver could do with another going-over.</p>' },
+        { id:'toMainHallD', type:'door', targetMap:'mainHall', targetSpawn:{x:720,y:495}, x:410, y:478, icon:'🚪', label:'Main Hall', shape:'door' }
+      ],
+      spawn: { x:410, y:420 }
+    },
+    berths: {
+      name: 'Passenger Berths',
+      width: 800, height: 500, wallThickness: 24,
+      floor: { base:'#4a3f33', plank:'#3d342a', style:'planks' },
+      wallColor: '#1c2a3d',
+      obstacles: [
+        { x:70,  y:24, w:96, h:50, type:'bunk' },
+        { x:196, y:24, w:96, h:50, type:'bunk' },
+        { x:322, y:24, w:96, h:50, type:'bunk' },
+        { x:508, y:24, w:96, h:50, type:'bunk' },
+        { x:634, y:24, w:96, h:50, type:'bunk' },
+        { x:70,  y:426, w:96, h:50, type:'bunk' },
+        { x:196, y:426, w:96, h:50, type:'bunk' },
+        { x:508, y:426, w:96, h:50, type:'bunk' },
+        { x:634, y:426, w:96, h:50, type:'bunk' },
+        { x:330, y:200, w:54, h:36, type:'trunk' },
+        { x:470, y:280, w:54, h:36, type:'trunk' }
+      ],
+      decor: [
+        { type:'runner', x:60, y:238, w:680, h:40 }
+      ],
+      lights: [
+        { x:180, y:250, r:150, color:'255,198,130', alpha:0.17 },
+        { x:400, y:250, r:150, color:'255,198,130', alpha:0.17 },
+        { x:620, y:250, r:150, color:'255,198,130', alpha:0.17 }
+      ],
+      portholes: [ {side:'left', at:250}, {side:'right', at:250} ],
+      interactables: [
+        { id:'deck', type:'room', roomId:'deck', x:52, y:170, icon:'🧹', label:'Linen Locker', shape:'locker' },
+        { id:'washstand', type:'flavor', x:748, y:170, icon:'🪞', label:'Washstand', shape:'washstand',
+          text: () => state.shipCondition >= 70
+            ? '<p>Enamel basins in a scrubbed wooden rack, each with its own folded towel. Somebody keeps this corner properly.</p>'
+            : '<p>Enamel basins in a wooden rack. One of the taps drips, and the towel beside it has seen better voyages.</p>' },
+        { id:'bunkNote', type:'flavor', x:400, y:130, icon:'✉️', label:'A Pinned Letter', shape:'none',
+          text: () => '<p>Someone has pinned a letter to the bulkhead above their berth — half-finished, addressed to an aunt in Penang. It describes the ship in terms so glowing you almost do not recognise her.</p>' },
+        { id:'toMainHallR', type:'door', targetMap:'mainHall', targetSpawn:{x:810,y:420}, x:400, y:458, icon:'🚪', label:'Main Hall', shape:'door' }
+      ],
+      spawn: { x:400, y:380 }
+    }
+    // --- Add a new map here, then repoint a door-type interactable at it. ---
+  };
+
+  // Talking to someone costs nothing but can only lift spirits once a day.
+  // Repeat conversations still work — they just stop paying out until tomorrow.
+  const NPCS = {
+    mainHall: [
+      {
+        id:'halim', name:'Mrs. Halim', color:'#7a2e3d', hat:true,
+        x:200, y:330, wanderRadius:90, speed:26,
+        lines: () => {
+          const out = ["\"This ship is the loveliest thing I have ever set foot on. Don't you let it sink, Captain.\""];
+          if (state.happiness >= 75) out.push('"The stewards have been marvellous. I shall write to the line about it."');
+          if (state.happiness < 40) out.push('"I shan\'t complain, Captain. But the others are complaining, and I hear them."');
+          if (state.shipCondition < 50) out.push('"There is a draught in my cabin that was not there when we sailed."');
+          if (state.day >= 10) out.push('"Ten days at sea and I have quite forgotten what a street looks like."');
+          return out;
+        }
+      },
+      {
+        id:'faris', name:'Faris', color:'#3a4a7a', hat:false, small:true,
+        x:660, y:320, wanderRadius:110, speed:44,
+        lines: () => {
+          const out = ['"Captain! Captain! How fast can she go? Faster than a train?"'];
+          if (state.happiness >= 70) out.push('"Mother says I mustn\'t run in the hall. I\'m only walking very quickly."');
+          if (state.reputation >= 4) out.push('"When I\'m grown I\'m going to have a ship. A bigger one. No offence."');
+          if (state.day >= 7) out.push('"I\'ve counted every porthole on this deck. There are more than I can count."');
+          return out;
+        }
+      },
+      {
+        id:'rahim', name:'Officer Rahim', color:'#e9dcc0', hat:true, crew:true,
+        x:300, y:470, wanderRadius:80, speed:32,
+        lines: () => {
+          const out = ['"All quiet on my watch, Captain."'];
+          if (state.lookout >= 2) out.push('"The lookouts are doubled and sharp-eyed. Nothing gets past us tonight."');
+          if (state.lookout === 0) out.push('"We\'ve no one extra on watch tonight, Captain. I\'d not sleep easy on that."');
+          if (state.fuel < 25) out.push('"Coal\'s running low, sir. The chief\'s been muttering about it all morning."');
+          if (state.shipCondition < 45) out.push('"She\'s taking the swells harder than she should, Captain. She wants seeing to."');
+          return out;
+        }
+      }
+    ],
+    captainsRoom: [
+      {
+        id:'tan', name:'Chief Engineer Tan', color:'#2f5d4f', hat:true, crew:true,
+        x:460, y:190, wanderRadius:64, speed:24,
+        lines: () => {
+          const out = ['"Boilers are holding, Captain. She\'s a good ship."'];
+          if (state.fuel >= 70) out.push('"Bunkers are full and the fires are hot. Give me the word and I\'ll give you speed."');
+          if (state.fuel < 25) out.push('"I\'ll be blunt, Captain — we\'re burning the last of the good coal."');
+          if (state.upgrades.includes('reinforcedHull')) out.push('"That new plating was money well spent. I\'d sail her through anything now."');
+          if (state.shipCondition < 50) out.push('"There\'s a seam aft I don\'t like the look of. Give me a day and some hands."');
+          return out;
+        }
+      }
+    ],
+    boilerRoom: [
+      {
+        id:'idris', name:'Stoker Idris', color:'#8a4a2f', hat:false, crew:true,
+        x:210, y:380, wanderRadius:80, speed:30,
+        lines: () => {
+          const out = ['"Hot work, Captain. But she eats what we feed her and asks for more."'];
+          if (state.fuel >= 70) out.push('"Bunkers are heaped high. We\'ll not go hungry down here for a while yet."');
+          if (state.fuel < 25) out.push('"We\'re scraping the bunker floor, Captain. Another day or two and there\'ll be nothing to shovel."');
+          if (state.happiness >= 75) out.push('"They say the passengers are dancing up top. Nice to know what we\'re sweating for."');
+          if (state.day >= 12) out.push('"I\'ve not seen daylight in a fortnight. Suits me fine, mind."');
+          return out;
+        }
+      },
+      {
+        id:'zaki', name:'Trimmer Zaki', color:'#57544a', hat:false, crew:true,
+        x:620, y:390, wanderRadius:76, speed:36,
+        lines: () => {
+          const out = ['"Mind the plates, Captain — they get slick when the coal dust settles."'];
+          if (state.shipCondition >= 80) out.push('"She\'s running sweet. You can hear it in the pistons if you know the sound."');
+          if (state.shipCondition < 50) out.push('"There\'s a knock in number three I don\'t care for. Ought to tell the chief."');
+          if (state.reputation >= 4) out.push('"Word is she\'s the finest ship on the line now. We hear things down here too."');
+          return out;
+        }
+      },
+      {
+        id:'hassan', name:'Fireman Hassan', color:'#6b3f2f', hat:false, crew:true,
+        x:250, y:140, wanderRadius:64, speed:28,
+        lines: () => {
+          const out = ['"Four hours on, eight off, and the fire never sleeps. That\'s the whole of it, Captain."'];
+          if (state.fuel < 25) out.push('"We\'re rationing the fires, sir. Can\'t make steam out of an empty bunker."');
+          if (state.happiness < 40) out.push('"Word travels down here quick when the passengers are unhappy. Puts a mood on the watch."');
+          if (state.day >= 15) out.push('"My brother sailed the old ships. Said they were slower and honester. I don\'t know that he was right."');
+          return out;
+        }
+      }
+    ],
+    diningSaloon: [
+      {
+        id:'salleh', name:'Encik Salleh', color:'#2a2a3f', hat:false, crew:true,
+        x:646, y:206, wanderRadius:15, speed:14,
+        lines: () => {
+          const out = ['"Every night the same request, Captain, and every night I play it. They do love a sad one."'];
+          if (state.happiness >= 75) out.push('"They were singing along by the second verse tonight. You don\'t often get that."');
+          if (state.happiness < 40) out.push('"I have played to a quiet room before. It is never the piano\'s fault, but it feels like it."');
+          if (state.day >= 10) out.push('"I have worn a groove in this bench, I think. Worse ways to cross an ocean."');
+          return out;
+        }
+      },
+      {
+        id:'meiling', name:'Mei Ling', color:'#7a2e3d', hat:false,
+        x:730, y:250, wanderRadius:48, speed:22,
+        lines: () => {
+          const out = ['"The acoustics in here are better than any hall I have played ashore. All this panelling."'];
+          if (state.happiness >= 70) out.push('"Salleh and I have three new pieces ready. The saloon is in the mood for them."');
+          if (state.shipCondition < 50) out.push('"There is a rattle in the deckhead that comes in half a beat behind me. Most distracting."');
+          return out;
+        }
+      },
+      {
+        id:'rosli', name:'Steward Rosli', color:'#e9dcc0', hat:true, crew:true,
+        x:340, y:270, wanderRadius:100, speed:38,
+        lines: () => {
+          const out = ['"Two hundred covers tonight, Captain, and every one of them on time."'];
+          if (state.food < 25) out.push('"I shall be honest, sir — the pantry is thin. I am making the menu sound grander than it is."');
+          if (state.food >= 70) out.push('"The pantry is full and the cooks are cheerful. It makes my job very nearly easy."');
+          if (state.reputation >= 4.5) out.push('"A gentleman asked me last night whether he might book the same table next season. I said I would ask you."');
+          return out;
+        }
+      }
+    ],
+    berths: [
+      {
+        id:'ramli', name:'Pak Ramli', color:'#4f7a7a', hat:true,
+        x:210, y:310, wanderRadius:90, speed:24,
+        lines: () => {
+          const out = ['"Third class, but a clean bunk and three meals. I have paid more for worse ashore, Captain."'];
+          if (state.happiness >= 70) out.push('"There is singing down this end most evenings. You should come and hear it sometime."');
+          if (state.happiness < 40) out.push('"People are short with each other down here lately. It is the waiting more than anything."');
+          if (state.shipCondition < 50) out.push('"There is water coming in somewhere along this passage. Only a little. But it was not there before."');
+          return out;
+        }
+      },
+      {
+        id:'siti', name:'Siti', color:'#8a6f2f', hat:false,
+        x:580, y:320, wanderRadius:84, speed:34,
+        lines: () => {
+          const out = ['"I am going to my brother. He has a shop and a spare room and no idea I am coming."'];
+          if (state.day >= 8) out.push('"I have started writing it all down. Nobody at home will believe a ship can be this big otherwise."');
+          if (state.happiness >= 75) out.push('"A steward brought soup down for the old woman in the next berth. Nobody asked him to. I noticed."');
+          if (state.reputation >= 4) out.push('"They say your name up on the top deck like you are somebody. Down here too, mind."');
+          return out;
+        }
+      }
+    ]
+  };
+
+  const PLAYER_COLOR = '#2f5d8f';
+  const PLAYER_RADIUS = 9;
+  const PLAYER_SPEED = 158; // px/sec
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const MOVE_KEYS = { w:'up', a:'left', s:'down', d:'right', arrowup:'up', arrowleft:'left', arrowdown:'down', arrowright:'right' };
+
+  // Lighting shifts through the day as the captain's working hours are spent.
+  const TIME_OF_DAY = [
+    { name:'Night',     tint:'20,30,64',  alpha:0.40 }, // 0 hours left
+    { name:'Evening',   tint:'70,44,74',  alpha:0.26 },
+    { name:'Afternoon', tint:'92,66,40',  alpha:0.12 },
+    { name:'Midday',    tint:'255,238,200', alpha:0.05 },
+    { name:'Morning',   tint:'150,170,200', alpha:0.10 }  // 4 hours left
+  ];
+  function timeOfDay(){ return TIME_OF_DAY[clamp(state.hours, 0, TIME_OF_DAY.length-1)]; }
+
+  const heldKeys = new Set();
+  const player = { map:'mainHall', x:381, y:430, isMoving:false, facing:'down', walkPhase:0 };
+  let activeInteractable = null;
+  let lastFrameTime = 0;
+  let npcRuntime = [];
+  let dustMotes = [];
+  let staticLayer = null;
+
+  const mapCanvasEl = document.getElementById('mapCanvas');
+  const interactPromptEl = document.getElementById('interactPrompt');
+  const mapTitleEl = document.getElementById('mapTitle');
+
+  function currentMapDef(){ return MAPS[player.map]; }
+
+  function circleRectOverlap(cx,cy,cr,rx,ry,rw,rh){
+    const closestX = clamp(cx, rx, rx+rw);
+    const closestY = clamp(cy, ry, ry+rh);
+    const dx = cx-closestX, dy = cy-closestY;
+    return (dx*dx+dy*dy) < (cr*cr);
+  }
+
+  function collidesAt(map, x, y, r){
+    const t = map.wallThickness;
+    const walls = [
+      { x:0, y:0, w:map.width, h:t },
+      { x:0, y:map.height-t, w:map.width, h:t },
+      { x:0, y:0, w:t, h:map.height },
+      { x:map.width-t, y:0, w:t, h:map.height }
+    ];
+    for (const w of walls) if (circleRectOverlap(x,y,r,w.x,w.y,w.w,w.h)) return true;
+    for (const o of map.obstacles) if (circleRectOverlap(x,y,r,o.x,o.y,o.w,o.h)) return true;
+    return false;
+  }
+
+  // ---- NPCs ----------------------------------------------------------------
+
+  function spawnNpcsForMap(mapId){
+    const defs = NPCS[mapId] || [];
+    npcRuntime = defs.map(def => ({
+      def,
+      id: def.id,
+      x: def.x, y: def.y,
+      homeX: def.x, homeY: def.y,
+      targetX: def.x, targetY: def.y,
+      pauseFor: Math.random()*2,
+      isMoving: false,
+      facing: 'down',
+      walkPhase: Math.random()*10
+    }));
+  }
+
+  function pickNpcTarget(npc){
+    const map = currentMapDef();
+    for (let tries = 0; tries < 12; tries++){
+      const a = Math.random()*Math.PI*2;
+      const d = Math.random()*npc.def.wanderRadius;
+      const tx = npc.homeX + Math.cos(a)*d;
+      const ty = npc.homeY + Math.sin(a)*d;
+      if (!collidesAt(map, tx, ty, 8)) { npc.targetX = tx; npc.targetY = ty; return; }
+    }
+    npc.targetX = npc.homeX; npc.targetY = npc.homeY;
+  }
+
+  function updateNpcs(dt){
+    const map = currentMapDef();
+    npcRuntime.forEach(npc => {
+      if (npc.pauseFor > 0){
+        npc.pauseFor -= dt;
+        npc.isMoving = false;
+        return;
+      }
+      const dx = npc.targetX - npc.x, dy = npc.targetY - npc.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 3){
+        npc.pauseFor = 1 + Math.random()*4;
+        pickNpcTarget(npc);
+        npc.isMoving = false;
+        return;
+      }
+      const step = npc.def.speed * dt;
+      const nx = npc.x + (dx/dist)*step;
+      const ny = npc.y + (dy/dist)*step;
+      let moved = false;
+      if (!collidesAt(map, nx, npc.y, 8)){ npc.x = nx; moved = true; }
+      if (!collidesAt(map, npc.x, ny, 8)){ npc.y = ny; moved = true; }
+      if (!moved){ npc.pauseFor = 0.4; pickNpcTarget(npc); }
+      npc.facing = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+      npc.isMoving = moved;
+      npc.walkPhase += dt * 9;
+    });
+  }
+
+  function talkToNpc(npc){
+    const def = npc.def;
+    const alreadyToday = !!state.npcTalks[def.id];
+    const lines = def.lines();
+    const line = pickOne(lines);
+    let footer = '';
+
+    if (!alreadyToday){
+      state.npcTalks[def.id] = true;
+      state.friendship[def.id] = (state.friendship[def.id] || 0) + 1;
+      state.happiness = clamp(state.happiness + 1, 0, 100);
+      const f = state.friendship[def.id];
+      if (f === 3) footer = `<p class="modal-hint">${def.name} seems glad to see you coming.</p>`;
+      else if (f === 8) footer = `<p class="modal-hint">${def.name} counts you a friend now.</p>`;
+      else if (f === 15) footer = `<p class="modal-hint">After all these days at sea, ${def.name} would follow you onto any ship.</p>`;
+      else footer = `<p class="modal-hint">Spirits aboard lift a little. (Friendship ${f})</p>`;
+      render();
+      saveGame();
+    } else {
+      footer = '<p class="modal-hint">You have already spoken today, but the company is welcome all the same.</p>';
+    }
+
+    openModal(def.name, `<p>${line}</p>${footer}`, [
+      { label:'Take your leave', primary:true, onClick: closeModal }
+    ]);
+  }
+
+  // ---- Player --------------------------------------------------------------
+
+  function updatePlayer(dt){
+    const map = currentMapDef();
+    if (!modalOverlay.classList.contains('hidden')){
+      player.isMoving = false;
+      return; // pause exploration while any dialog is open
+    }
+    let dx = 0, dy = 0;
+    if (heldKeys.has('up')) dy -= 1;
+    if (heldKeys.has('down')) dy += 1;
+    if (heldKeys.has('left')) dx -= 1;
+    if (heldKeys.has('right')) dx += 1;
+    if (dx !== 0 && dy !== 0){ dx *= 0.7071; dy *= 0.7071; }
+
+    if (dx !== 0){
+      const nx = player.x + dx*PLAYER_SPEED*dt;
+      if (!collidesAt(map, nx, player.y, PLAYER_RADIUS)) player.x = nx;
+    }
+    if (dy !== 0){
+      const ny = player.y + dy*PLAYER_SPEED*dt;
+      if (!collidesAt(map, player.x, ny, PLAYER_RADIUS)) player.y = ny;
+    }
+    player.x = clamp(player.x, map.wallThickness+PLAYER_RADIUS, map.width-map.wallThickness-PLAYER_RADIUS);
+    player.y = clamp(player.y, map.wallThickness+PLAYER_RADIUS, map.height-map.wallThickness-PLAYER_RADIUS);
+    player.isMoving = dx !== 0 || dy !== 0;
+    if (player.isMoving){
+      player.facing = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+      player.walkPhase += dt * 11;
+    }
+
+    // Nearest thing worth pressing E on — props and people compete on distance.
+    let nearest = null, nearestDist = Infinity;
+    for (const it of map.interactables){
+      const d = Math.hypot(player.x-it.x, player.y-it.y);
+      if (d <= (it.radius || 42) && d < nearestDist){ nearest = it; nearestDist = d; }
+    }
+    for (const npc of npcRuntime){
+      const d = Math.hypot(player.x-npc.x, player.y-npc.y);
+      if (d <= 40 && d < nearestDist){
+        nearest = { type:'npc', npc, label:'Talk to ' + npc.def.name };
+        nearestDist = d;
+      }
+    }
+    activeInteractable = nearest;
+  }
+
+  // The floor, rugs and lamplight never change once a map is built, so they're
+  // rendered once into an offscreen canvas and blitted each frame rather than
+  // re-running the whole parquet pattern 60 times a second.
+  function buildStaticLayer(map){
+    let off;
+    try {
+      off = document.createElement('canvas');
+      off.width = map.width * DPR;
+      off.height = map.height * DPR;
+      const octx = off.getContext('2d');
+      if (!octx) return null;
+      octx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      drawFloor(octx, map);
+      drawDecor(octx, map);
+      drawLights(octx, map);
+      return off;
+    } catch (e){
+      return null; // fall back to drawing the floor live
+    }
+  }
+
+  function updateMapMeta(){
+    const map = currentMapDef();
+    if (mapTitleEl) mapTitleEl.textContent = map.name;
+    if (mapCanvasEl){
+      mapCanvasEl.width = map.width * DPR;
+      mapCanvasEl.height = map.height * DPR;
+      mapCanvasEl.style.aspectRatio = map.width + ' / ' + map.height;
+    }
+    staticLayer = buildStaticLayer(map);
+    dustMotes = [];
+    for (let i = 0; i < 22; i++){
+      dustMotes.push({
+        x: Math.random()*map.width,
+        y: Math.random()*map.height,
+        r: 0.6 + Math.random()*1.2,
+        drift: 4 + Math.random()*10,
+        phase: Math.random()*Math.PI*2
+      });
+    }
+  }
+
+  function goToMap(mapId, spawn){
+    const map = MAPS[mapId];
+    if (!map) return;
+    player.map = mapId;
+    player.x = spawn ? spawn.x : map.spawn.x;
+    player.y = spawn ? spawn.y : map.spawn.y;
+    player.facing = 'down';
+    activeInteractable = null;
+    state.currentMap = mapId;
+    spawnNpcsForMap(mapId);
+    updateMapMeta();
+    saveGame();
+  }
+
+  function handleInteract(){
+    if (!modalOverlay.classList.contains('hidden')) return;
+    const it = activeInteractable;
+    if (!it) return;
+    if (it.type === 'room') doRoom(it.roomId);
+    else if (it.type === 'shipyard') openShipyard();
+    else if (it.type === 'sleep') endDayFlow();
+    else if (it.type === 'door') goToMap(it.targetMap, it.targetSpawn);
+    else if (it.type === 'npc') talkToNpc(it.npc);
+    else if (it.type === 'clock') openClock();
+    else if (it.type === 'gauge') openGauge();
+    else if (it.type === 'logbook') openLogbook();
+    else if (it.type === 'piano') openPiano();
+    else if (it.type === 'flavor') openFlavor(it);
+  }
+
+  // A generic "look at this" interactable. Give a map entry a `text` — either a
+  // string or a function of state — and it becomes a readable piece of scenery
+  // with no other wiring needed.
+  function openFlavor(it){
+    const body = typeof it.text === 'function' ? it.text() : (it.text || '<p>Nothing much to see.</p>');
+    openModal(it.label || 'A Closer Look', body, [
+      { label:'Move on', primary:true, onClick: closeModal }
+    ]);
+  }
+
+  // Standing by the piano while the trio plays lifts the room. Like talking to
+  // someone, it pays out once a day and costs no working hours.
+  function openPiano(){
+    const already = !!state.npcTalks.__piano;
+    let footer;
+    if (!already){
+      state.npcTalks.__piano = true;
+      state.happiness = clamp(state.happiness + 2, 0, 100);
+      footer = '<p class="modal-hint">You stay for the whole piece. The saloon feels warmer for it.</p>';
+      render();
+      saveGame();
+    } else {
+      footer = '<p class="modal-hint">You have already stopped to listen today.</p>';
+    }
+    const body = state.happiness >= 70
+      ? '<p>Encik Salleh has the saloon in his hand. Mei Ling comes in over the top of him, and somewhere behind you a table stops talking to listen.</p>'
+      : '<p>Encik Salleh plays on to a half-attentive room. It is good playing. It deserves a better night than this one.</p>';
+    openModal('The Grand Piano', body + footer, [
+      { label:'Move on', primary:true, onClick: closeModal }
+    ]);
+  }
+
+  function openGauge(){
+    const pct = Math.round((state.fuel / Math.max(state.fuelMax,1)) * 100);
+    const verdict = pct >= 70
+      ? 'The needle sits high and steady. There is coal enough to drive her hard.'
+      : pct >= 35
+        ? 'The needle rests in the middle of the dial. Comfortable, but not generous.'
+        : 'The needle hangs low, well into the red. The bunkers want filling badly.';
+    openModal('Pressure Gauge', `
+      <p>The brass dial reads <strong>${pct}%</strong> — ${state.fuel} of ${state.fuelMax} measures of coal remaining.</p>
+      <p>${verdict}</p>
+      <p class="modal-hint">The bunkers take on ${20} more each morning while she is under way.</p>
+    `, [{ label:'Step back', primary:true, onClick: closeModal }]);
+  }
+
+  function openClock(){
+    const tod = timeOfDay();
+    const hoursText = state.hours === 0
+      ? 'The working day is done. Your bed is waiting in the Captain\'s Room.'
+      : `You have <strong>${state.hours}</strong> working hour${state.hours===1?'':'s'} left before you turn in.`;
+    openModal('The Grand Clock', `
+      <p>The great brass clock at the head of the staircase reads <strong>${tod.name.toLowerCase()}</strong> on day ${state.day} of the voyage.</p>
+      <p>${hoursText}</p>
+    `, [{ label:'Step away', primary:true, onClick: closeModal }]);
+  }
+
+  function openLogbook(){
+    const recent = state.log.slice(-6).reverse();
+    const body = recent.length
+      ? recent.map(e => `<p><span class="modal-hint">Day ${e.day} — </span>${e.text}</p>`).join('')
+      : '<p>The pages are still blank. The voyage has barely begun.</p>';
+    const friends = Object.keys(state.friendship || {});
+    const friendLine = friends.length
+      ? `<p class="modal-hint">Aboard you count ${friends.length} familiar face${friends.length===1?'':'s'}.</p>`
+      : '';
+    openModal("Ship's Logbook", body + friendLine, [
+      { label:'Close the book', primary:true, onClick: closeModal }
+    ]);
+  }
+
+  function updateInteractionPrompt(){
+    if (!interactPromptEl) return;
+    if (activeInteractable){
+      interactPromptEl.textContent = '[E] ' + (activeInteractable.label || 'Interact');
+      interactPromptEl.classList.remove('hidden');
+    } else {
+      interactPromptEl.classList.add('hidden');
+    }
+  }
+
+  // ---- Drawing -------------------------------------------------------------
+  // Characters share one routine so the player, passengers and crew all read
+  // as the same species of little flat-coated silhouette — same visual family
+  // as the promenade figures up top.
+
+  function drawCharacter(ctx, x, y, opts){
+    const { color, facing = 'down', walkPhase = 0, isMoving = false, hat = false, small = false, crew = false } = opts;
+    const s = small ? 0.78 : 1;
+    const swing = isMoving ? Math.sin(walkPhase) * 3 : 0;
+    const bob = isMoving ? Math.abs(Math.sin(walkPhase)) * 1.4 : 0;
+    const yy = y - bob;
+
+    ctx.save();
+    ctx.translate(x, yy);
+    ctx.scale(s, s);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.beginPath(); ctx.ellipse(0, 1, 8, 2.6, 0, 0, Math.PI*2); ctx.fill();
+
+    // legs
+    ctx.fillStyle = SILHOUETTE_DARK;
+    if (facing === 'left' || facing === 'right'){
+      ctx.fillRect(-2.2 + swing*0.5, -5, 3.4, 6);
+      ctx.fillRect(-2.2 - swing*0.5, -5, 3.4, 6);
+    } else {
+      ctx.fillRect(-5 + swing, -5, 3.6, 6);
+      ctx.fillRect(1.4 - swing, -5, 3.6, 6);
+    }
+
+    // coat
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(-6.4, -4);
+    ctx.lineTo(-7.2, -19);
+    ctx.quadraticCurveTo(-7.2, -23.5, 0, -23.5);
+    ctx.quadraticCurveTo(7.2, -23.5, 7.2, -19);
+    ctx.lineTo(6.4, -4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // coat detail — a lapel seam facing the viewer, or a crew stripe
+    if (facing !== 'up'){
+      ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+      ctx.beginPath(); ctx.moveTo(0, -21); ctx.lineTo(0, -6); ctx.stroke();
+    }
+    if (crew){
+      ctx.fillStyle = 'rgba(201,162,75,0.9)';
+      ctx.fillRect(-6.6, -9, 13.2, 1.6);
+    }
+
+    // arms
+    ctx.fillStyle = color;
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    if (facing === 'left' || facing === 'right'){
+      ctx.fillRect(-1.6, -19 + swing*0.6, 3.2, 11);
+    } else {
+      ctx.fillRect(-9.4, -19 - swing*0.4, 3.2, 11);
+      ctx.fillRect(6.2, -19 + swing*0.4, 3.2, 11);
+    }
+    ctx.restore();
+
+    // head
+    ctx.fillStyle = SILHOUETTE_DARK;
+    ctx.beginPath(); ctx.arc(0, -27, 4.4, 0, Math.PI*2); ctx.fill();
+
+    if (hat){
+      ctx.fillStyle = crew ? '#e9dcc0' : color;
+      ctx.beginPath(); ctx.ellipse(0, -29.6, 6.2, 1.8, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillRect(-3.4, -33.4, 6.8, 4);
+      if (crew){
+        ctx.fillStyle = 'rgba(201,162,75,0.95)';
+        ctx.fillRect(-3.4, -30.8, 6.8, 1.4);
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawObstacle(ctx, o, t){
+    const cx = o.x + o.w/2, cy = o.y + o.h/2;
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = SILHOUETTE_DARK;
+
+    switch (o.type){
+      case 'stairs': {
+        // Carpeted grand staircase, widening toward the viewer, with
+        // balustrades and a landing — the centrepiece of the hall.
+        const steps = 7, stepH = o.h/steps;
+        for (let i = 0; i < steps; i++){
+          const f = i/(steps-1);
+          const stepW = o.w * (0.52 + 0.48*f);
+          const sx = cx - stepW/2, sy = o.y + i*stepH;
+          ctx.fillStyle = i % 2 === 0 ? '#8a6f2f' : '#a08348';
+          ctx.fillRect(sx, sy, stepW, stepH - 1.5);
+          ctx.fillStyle = 'rgba(107,44,58,0.85)'; // carpet runner down the middle
+          ctx.fillRect(cx - stepW*0.22, sy, stepW*0.44, stepH - 1.5);
+          ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+          ctx.beginPath(); ctx.moveTo(sx, sy + stepH - 1.5); ctx.lineTo(sx + stepW, sy + stepH - 1.5); ctx.stroke();
+        }
+        // balustrades along both flanks
+        ctx.strokeStyle = 'rgba(201,162,75,0.85)';
+        ctx.lineWidth = 2.5;
+        for (const side of [-1, 1]){
+          ctx.beginPath();
+          ctx.moveTo(cx + side*(o.w*0.26), o.y);
+          ctx.lineTo(cx + side*(o.w*0.5), o.y + o.h);
+          ctx.stroke();
+        }
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(201,162,75,0.5)';
+        for (let i = 0; i < steps; i++){
+          const f = i/(steps-1);
+          const halfW = o.w * (0.26 + 0.24*f);
+          const yy = o.y + i*stepH;
+          for (const side of [-1, 1]){
+            ctx.beginPath(); ctx.moveTo(cx + side*halfW, yy); ctx.lineTo(cx + side*halfW, yy - 7); ctx.stroke();
+          }
+        }
+        break;
+      }
+      case 'palm': {
+        ctx.fillStyle = '#8a5a33';
+        ctx.beginPath();
+        ctx.moveTo(cx-9, o.y+o.h); ctx.lineTo(cx-6, o.y+o.h-13);
+        ctx.lineTo(cx+6, o.y+o.h-13); ctx.lineTo(cx+9, o.y+o.h);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#2f5d4f';
+        for (let i = 0; i < 6; i++){
+          const a = (i/6)*Math.PI*2 + Math.sin(t*0.6)*0.06;
+          ctx.save();
+          ctx.translate(cx, o.y+o.h-15);
+          ctx.rotate(a);
+          ctx.beginPath();
+          ctx.ellipse(0, -10, 4.5, 12, 0, 0, Math.PI*2);
+          ctx.fill();
+          ctx.restore();
+        }
+        break;
+      }
+      case 'bench': {
+        ctx.fillStyle = '#6b4a2f';
+        ctx.fillRect(o.x, o.y+6, o.w, o.h-6); ctx.strokeRect(o.x, o.y+6, o.w, o.h-6);
+        ctx.fillStyle = '#8a6f2f';
+        ctx.fillRect(o.x, o.y, o.w, 7); ctx.strokeRect(o.x, o.y, o.w, 7);
+        break;
+      }
+      case 'table': {
+        ctx.fillStyle = '#6b4a2f';
+        ctx.beginPath(); ctx.ellipse(cx, cy, o.w/2, o.h/2, 0, 0, Math.PI*2);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e9dcc0';
+        ctx.beginPath(); ctx.ellipse(cx, cy-3, o.w/2-9, o.h/2-6, 0, 0, Math.PI*2); ctx.fill();
+        // a small vase of flowers
+        ctx.fillStyle = '#2f5d4f';
+        ctx.fillRect(cx-3, cy-13, 6, 9);
+        ctx.fillStyle = '#a8567a';
+        ctx.beginPath(); ctx.arc(cx, cy-15, 4, 0, Math.PI*2); ctx.fill();
+        break;
+      }
+      case 'wheel': {
+        ctx.strokeStyle = '#8a6f2f'; ctx.lineWidth = 3.5;
+        ctx.beginPath(); ctx.arc(cx, cy, o.w/2 - 2, 0, Math.PI*2); ctx.stroke();
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 8; i++){
+          const a = (i/8)*Math.PI*2 + Math.sin(t*0.35)*0.12;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a)*3, cy + Math.sin(a)*3);
+          ctx.lineTo(cx + Math.cos(a)*(o.w/2+4), cy + Math.sin(a)*(o.w/2+4));
+          ctx.stroke();
+        }
+        ctx.fillStyle = '#c9a24b';
+        ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI*2); ctx.fill();
+        break;
+      }
+      case 'bookshelf': {
+        ctx.fillStyle = '#4a3221';
+        ctx.fillRect(o.x, o.y, o.w, o.h); ctx.strokeRect(o.x, o.y, o.w, o.h);
+        const colors = ['#7a2e3d','#2f5d4f','#8a6f2f','#3a4a7a','#6b3f6b'];
+        for (let i = 0; i < 9; i++){
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.fillRect(o.x + 3 + i*5.6, o.y + 3, 4.4, o.h - 6);
+        }
+        break;
+      }
+      case 'globe': {
+        ctx.fillStyle = '#8a6f2f';
+        ctx.fillRect(cx-2.5, cy+6, 5, 7);
+        ctx.fillStyle = '#3a6b7a';
+        ctx.beginPath(); ctx.arc(cx, cy, o.w/2 - 1, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#2f5d4f'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(cx, cy, o.w/2 - 1, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(cx, cy, (o.w/2-1)*0.42, o.w/2 - 1, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx-(o.w/2-1), cy); ctx.lineTo(cx+(o.w/2-1), cy); ctx.stroke();
+        break;
+      }
+      case 'furnaces': {
+        // A bank of four furnace doors set into the forward bulkhead. The fire
+        // behind each one flickers on its own offset so they never pulse in sync.
+        ctx.fillStyle = '#1c1512';
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+        ctx.strokeStyle = '#0f0b09'; ctx.lineWidth = 2;
+        ctx.strokeRect(o.x, o.y, o.w, o.h);
+        const n = 4, pad = 14;
+        const dw = (o.w - pad*(n+1)) / n;
+        for (let i = 0; i < n; i++){
+          const dx = o.x + pad + i*(dw+pad);
+          const dy = o.y + 12;
+          const dh = o.h - 24;
+          const flick = 0.55 + Math.sin(t*3.1 + i*1.7)*0.16 + Math.sin(t*7.3 + i*0.9)*0.08;
+          const gg = ctx.createLinearGradient(dx, dy, dx, dy+dh);
+          gg.addColorStop(0, `rgba(255,196,90,${0.85*flick})`);
+          gg.addColorStop(0.55, `rgba(233,110,40,${0.95*flick})`);
+          gg.addColorStop(1, `rgba(140,36,20,${0.9*flick})`);
+          ctx.fillStyle = gg;
+          ctx.fillRect(dx, dy, dw, dh);
+          ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 2;
+          ctx.strokeRect(dx, dy, dw, dh);
+          // iron cross-brace and handle on each door
+          ctx.strokeStyle = 'rgba(28,21,18,0.75)'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(dx, dy+dh/2); ctx.lineTo(dx+dw, dy+dh/2); ctx.stroke();
+          ctx.fillStyle = '#8a6f2f';
+          ctx.fillRect(dx+dw/2-2, dy+dh/2-7, 4, 14);
+        }
+        break;
+      }
+      case 'machine': {
+        // The reciprocating engine block: cylinders, piston rods, flywheel.
+        ctx.fillStyle = '#3d3630';
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+        ctx.strokeStyle = '#1c1512'; ctx.lineWidth = 2;
+        ctx.strokeRect(o.x, o.y, o.w, o.h);
+        ctx.fillStyle = '#4f4740';
+        for (let i = 0; i < 3; i++){
+          const cx2 = o.x + 22 + i*((o.w-44)/2);
+          ctx.beginPath(); ctx.arc(cx2, o.y + 24, 13, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = '#8a6f2f'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(cx2, o.y + 24, 13, 0, Math.PI*2); ctx.stroke();
+          // piston rod pumping in and out
+          const throw_ = Math.sin(t*2.4 + i*2.1) * 7;
+          ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(cx2, o.y + 34);
+          ctx.lineTo(cx2, o.y + 52 + throw_);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = '#8a6f2f'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(o.x+10, o.y+o.h-16); ctx.lineTo(o.x+o.w-10, o.y+o.h-16); ctx.stroke();
+        ctx.fillStyle = '#2a2320';
+        ctx.beginPath(); ctx.arc(o.x + o.w - 24, o.y + o.h - 16, 11, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(o.x + o.w - 24, o.y + o.h - 16, 11, 0, Math.PI*2); ctx.stroke();
+        for (let i = 0; i < 6; i++){
+          const a = (i/6)*Math.PI*2 + t*1.6;
+          ctx.beginPath();
+          ctx.moveTo(o.x + o.w - 24, o.y + o.h - 16);
+          ctx.lineTo(o.x + o.w - 24 + Math.cos(a)*10, o.y + o.h - 16 + Math.sin(a)*10);
+          ctx.stroke();
+        }
+        break;
+      }
+      case 'coal': {
+        ctx.fillStyle = '#1a1614';
+        ctx.beginPath();
+        ctx.moveTo(o.x, o.y + o.h);
+        ctx.quadraticCurveTo(o.x + o.w*0.22, o.y + o.h*0.18, o.x + o.w*0.5, o.y + o.h*0.3);
+        ctx.quadraticCurveTo(o.x + o.w*0.78, o.y + o.h*0.42, o.x + o.w, o.y + o.h);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'rgba(120,110,105,0.5)'; // a few lumps catching the firelight
+        for (let i = 0; i < 7; i++){
+          const lx = o.x + 8 + ((i*13) % (o.w-14));
+          const ly = o.y + o.h - 6 - ((i*9) % (o.h-14));
+          ctx.beginPath(); ctx.arc(lx, ly, 2.2, 0, Math.PI*2); ctx.fill();
+        }
+        break;
+      }
+      case 'roundtable': {
+        ctx.fillStyle = 'rgba(0,0,0,0.22)';
+        ctx.beginPath(); ctx.ellipse(cx, cy+4, o.w/2, o.h/2.6, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#f4ecdc'; // white linen to the deck
+        ctx.beginPath(); ctx.ellipse(cx, cy, o.w/2, o.h/2, 0, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(120,100,70,0.5)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(cx, cy, o.w/2, o.h/2, 0, 0, Math.PI*2); ctx.stroke();
+        // place settings around the cloth
+        for (let i = 0; i < 4; i++){
+          const a = (i/4)*Math.PI*2 + Math.PI/4;
+          const px = cx + Math.cos(a)*(o.w*0.3), py = cy + Math.sin(a)*(o.h*0.3);
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = 'rgba(201,162,75,0.8)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI*2); ctx.stroke();
+        }
+        // centrepiece
+        ctx.fillStyle = '#2f5d4f';
+        ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#a8567a';
+        ctx.beginPath(); ctx.arc(cx, cy-3, 3.4, 0, Math.PI*2); ctx.fill();
+        break;
+      }
+      case 'roundcloth': {
+        ctx.fillStyle = '#f4ecdc';
+        ctx.beginPath(); ctx.ellipse(cx, cy, o.w/2, o.h/2, 0, 0, Math.PI*2); ctx.fill();
+        break;
+      }
+      case 'piano': {
+        // grand piano seen from above: curved case, raised lid, keyboard
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath(); ctx.ellipse(cx, o.y+o.h-4, o.w/2, 8, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#241a12';
+        ctx.beginPath();
+        ctx.moveTo(o.x, o.y + o.h);
+        ctx.lineTo(o.x, o.y + 14);
+        ctx.quadraticCurveTo(o.x, o.y, o.x + o.w*0.42, o.y);
+        ctx.quadraticCurveTo(o.x + o.w, o.y + 4, o.x + o.w, o.y + o.h*0.62);
+        ctx.quadraticCurveTo(o.x + o.w, o.y + o.h, o.x + o.w*0.6, o.y + o.h);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 1.6; ctx.stroke();
+        // open lid catching the light
+        ctx.fillStyle = 'rgba(201,162,75,0.16)';
+        ctx.beginPath();
+        ctx.moveTo(o.x + 6, o.y + 12);
+        ctx.quadraticCurveTo(o.x + o.w*0.5, o.y + 6, o.x + o.w - 10, o.y + o.h*0.5);
+        ctx.lineTo(o.x + o.w - 22, o.y + o.h*0.52);
+        ctx.quadraticCurveTo(o.x + o.w*0.5, o.y + 18, o.x + 12, o.y + 20);
+        ctx.closePath(); ctx.fill();
+        // keyboard along the straight edge
+        ctx.fillStyle = '#f4ecdc';
+        ctx.fillRect(o.x + 3, o.y + o.h - 13, o.w*0.5, 10);
+        ctx.strokeStyle = '#241a12'; ctx.lineWidth = 0.9;
+        for (let k = 0; k < 13; k++){
+          const kx = o.x + 4 + k*((o.w*0.5-2)/13);
+          ctx.beginPath(); ctx.moveTo(kx, o.y + o.h - 13); ctx.lineTo(kx, o.y + o.h - 3); ctx.stroke();
+        }
+        ctx.fillStyle = '#241a12';
+        for (let k = 0; k < 13; k++){
+          if (k % 7 === 2 || k % 7 === 6) continue;
+          const kx = o.x + 4 + k*((o.w*0.5-2)/13);
+          ctx.fillRect(kx + 1.4, o.y + o.h - 13, 2.2, 6);
+        }
+        // music rising from the instrument
+        ctx.fillStyle = 'rgba(242,233,216,0.5)';
+        ctx.font = '11px serif';
+        ctx.textAlign = 'center';
+        for (let i = 0; i < 3; i++){
+          const ph = (t*0.6 + i*0.42) % 1;
+          ctx.globalAlpha = 0.55 * (1 - ph);
+          ctx.fillText(i % 2 ? '♫' : '♪', cx + 16 + Math.sin(ph*5 + i)*8, o.y + 6 - ph*26);
+        }
+        ctx.globalAlpha = 1;
+        break;
+      }
+      case 'sideboard': {
+        ctx.fillStyle = '#5c3a24';
+        ctx.fillRect(o.x, o.y, o.w, o.h); ctx.strokeRect(o.x, o.y, o.w, o.h);
+        ctx.strokeStyle = 'rgba(201,162,75,0.6)'; ctx.lineWidth = 1;
+        ctx.strokeRect(o.x+4, o.y+4, o.w/2-6, o.h-8);
+        ctx.strokeRect(o.x+o.w/2+2, o.y+4, o.w/2-6, o.h-8);
+        ctx.fillStyle = '#c9a24b'; // silver service laid out on top
+        ctx.fillRect(o.x+10, o.y-6, 16, 6);
+        ctx.fillRect(o.x+o.w-30, o.y-6, 16, 6);
+        break;
+      }
+      case 'bunk': {
+        // a two-tier iron berth seen from above, blanket folded on the lower
+        ctx.fillStyle = '#3d342a';
+        ctx.fillRect(o.x, o.y, o.w, o.h); ctx.strokeRect(o.x, o.y, o.w, o.h);
+        ctx.fillStyle = '#5c6b74'; // iron frame
+        ctx.fillRect(o.x, o.y, o.w, 5);
+        ctx.fillRect(o.x, o.y+o.h-5, o.w, 5);
+        ctx.fillStyle = '#8a8272'; // mattress
+        ctx.fillRect(o.x+5, o.y+7, o.w-10, o.h-14);
+        ctx.fillStyle = '#4a6b7a'; // blanket
+        ctx.fillRect(o.x+5, o.y+o.h*0.5, o.w-10, o.h*0.5-7);
+        ctx.fillStyle = '#e9dcc0'; // pillow
+        ctx.fillRect(o.x+8, o.y+9, 20, 12);
+        ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1;
+        ctx.strokeRect(o.x+5, o.y+7, o.w-10, o.h-14);
+        // upper berth rail
+        ctx.strokeStyle = 'rgba(140,150,158,0.8)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(o.x+2, o.y+o.h*0.5); ctx.lineTo(o.x+o.w-2, o.y+o.h*0.5); ctx.stroke();
+        break;
+      }
+      case 'trunk': {
+        ctx.fillStyle = '#5c3a24';
+        ctx.fillRect(o.x, o.y, o.w, o.h); ctx.strokeRect(o.x, o.y, o.w, o.h);
+        ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(o.x+10, o.y); ctx.lineTo(o.x+10, o.y+o.h); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(o.x+o.w-10, o.y); ctx.lineTo(o.x+o.w-10, o.y+o.h); ctx.stroke();
+        ctx.fillStyle = '#c9a24b';
+        ctx.fillRect(o.x+o.w/2-4, o.y+o.h/2-3, 8, 6);
+        break;
+      }
+      case 'barrow': {
+        ctx.fillStyle = '#4a4038';
+        ctx.beginPath();
+        ctx.moveTo(o.x, o.y+o.h); ctx.lineTo(o.x+4, o.y);
+        ctx.lineTo(o.x+o.w-4, o.y); ctx.lineTo(o.x+o.w, o.y+o.h);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#1a1614'; // heaped coal
+        ctx.beginPath(); ctx.ellipse(cx, o.y+o.h*0.45, o.w*0.34, o.h*0.3, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#2a2320';
+        ctx.beginPath(); ctx.arc(o.x+2, o.y+o.h, 5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(o.x+o.w-2, o.y+o.h, 5, 0, Math.PI*2); ctx.fill();
+        break;
+      }
+      default: {
+        ctx.fillStyle = '#3a2a1c';
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+      }
+    }
+  }
+
+  function drawPropShape(ctx, it, t){
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = SILHOUETTE_DARK;
+    switch (it.shape){
+      case 'desk':
+        ctx.fillStyle = '#6b4a2f';
+        ctx.fillRect(it.x-28, it.y-9, 56, 20); ctx.strokeRect(it.x-28, it.y-9, 56, 20);
+        ctx.fillStyle = '#8a6f2f';
+        ctx.fillRect(it.x-28, it.y-13, 56, 5); ctx.strokeRect(it.x-28, it.y-13, 56, 5);
+        ctx.fillStyle = '#e9dcc0'; // ledger and tickets
+        ctx.fillRect(it.x-16, it.y-7, 13, 9);
+        ctx.fillStyle = '#c9a24b';
+        ctx.fillRect(it.x+4, it.y-6, 10, 6);
+        break;
+      case 'door':
+        ctx.fillStyle = '#5c3a24';
+        ctx.beginPath();
+        ctx.moveTo(it.x-16, it.y+16);
+        ctx.lineTo(it.x-16, it.y-6);
+        ctx.quadraticCurveTo(it.x-16, it.y-18, it.x, it.y-18);
+        ctx.quadraticCurveTo(it.x+16, it.y-18, it.x+16, it.y-6);
+        ctx.lineTo(it.x+16, it.y+16);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(201,162,75,0.75)'; ctx.lineWidth = 1.2;
+        ctx.strokeRect(it.x-11, it.y-11, 22, 22);
+        ctx.fillStyle = '#c9a24b';
+        ctx.beginPath(); ctx.arc(it.x+10, it.y+3, 2, 0, Math.PI*2); ctx.fill();
+        break;
+      case 'charttable':
+        ctx.fillStyle = '#6b4a2f';
+        ctx.fillRect(it.x-26, it.y-8, 52, 18); ctx.strokeRect(it.x-26, it.y-8, 52, 18);
+        ctx.fillStyle = '#e9dcc0'; // an unrolled chart
+        ctx.fillRect(it.x-20, it.y-13, 40, 14); ctx.strokeRect(it.x-20, it.y-13, 40, 14);
+        ctx.strokeStyle = 'rgba(47,93,143,0.65)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(it.x-16, it.y-4); ctx.quadraticCurveTo(it.x, it.y-12, it.x+16, it.y-6); ctx.stroke();
+        ctx.fillStyle = '#b3503f';
+        ctx.beginPath(); ctx.arc(it.x+11, it.y-7, 2, 0, Math.PI*2); ctx.fill();
+        break;
+      case 'cabinet':
+        ctx.fillStyle = '#4a3221';
+        ctx.fillRect(it.x-18, it.y-28, 36, 38); ctx.strokeRect(it.x-18, it.y-28, 36, 38);
+        ctx.strokeRect(it.x-18, it.y-28, 36, 19);
+        ctx.fillStyle = '#c9a24b';
+        ctx.beginPath(); ctx.arc(it.x-4, it.y-18, 1.8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(it.x-4, it.y+1, 1.8, 0, Math.PI*2); ctx.fill();
+        // rolled blueprints on top
+        ctx.fillStyle = '#7a9ab3';
+        ctx.fillRect(it.x-12, it.y-33, 24, 5); ctx.strokeRect(it.x-12, it.y-33, 24, 5);
+        break;
+      case 'bed':
+        ctx.fillStyle = '#4a3221';
+        ctx.fillRect(it.x-26, it.y-12, 52, 26); ctx.strokeRect(it.x-26, it.y-12, 52, 26);
+        ctx.fillStyle = '#2f4a6b'; // blanket
+        ctx.fillRect(it.x-26, it.y-2, 52, 16);
+        ctx.strokeRect(it.x-26, it.y-2, 52, 16);
+        ctx.fillStyle = '#e9dcc0'; // pillow
+        ctx.fillRect(it.x-22, it.y-9, 17, 11);
+        ctx.strokeRect(it.x-22, it.y-9, 17, 11);
+        break;
+      case 'lectern':
+        ctx.fillStyle = '#6b4a2f';
+        ctx.fillRect(it.x-4, it.y-2, 8, 12);
+        ctx.fillRect(it.x-11, it.y+8, 22, 4);
+        ctx.strokeRect(it.x-11, it.y+8, 22, 4);
+        ctx.fillStyle = '#e9dcc0'; // open book
+        ctx.beginPath();
+        ctx.moveTo(it.x-16, it.y-4); ctx.lineTo(it.x-1, it.y-8);
+        ctx.lineTo(it.x-1, it.y+1); ctx.lineTo(it.x-16, it.y+4);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(it.x+16, it.y-4); ctx.lineTo(it.x+1, it.y-8);
+        ctx.lineTo(it.x+1, it.y+1); ctx.lineTo(it.x+16, it.y+4);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        break;
+      case 'gauge': {
+        ctx.fillStyle = '#3d3630';
+        ctx.fillRect(it.x-4, it.y+10, 8, 16);
+        ctx.fillStyle = '#2a2320';
+        ctx.beginPath(); ctx.arc(it.x, it.y, 15, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#e9dcc0';
+        ctx.beginPath(); ctx.arc(it.x, it.y, 11.5, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.arc(it.x, it.y, 13.5, 0, Math.PI*2); ctx.stroke();
+        // red zone on the dial
+        ctx.strokeStyle = 'rgba(179,80,63,0.75)'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(it.x, it.y, 8.5, -Math.PI*0.15, Math.PI*0.25); ctx.stroke();
+        // needle reads the coal in the bunkers
+        const frac = clamp(state.fuel / Math.max(state.fuelMax, 1), 0, 1);
+        const a = Math.PI*0.75 + frac * Math.PI*1.5;
+        ctx.strokeStyle = '#b3503f'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(it.x, it.y);
+        ctx.lineTo(it.x + Math.cos(a)*9, it.y + Math.sin(a)*9);
+        ctx.stroke();
+        ctx.fillStyle = '#3d3630';
+        ctx.beginPath(); ctx.arc(it.x, it.y, 2, 0, Math.PI*2); ctx.fill();
+        break;
+      }
+      case 'servinghatch': {
+        ctx.fillStyle = '#4a3221';
+        ctx.fillRect(it.x-16, it.y-24, 32, 48); ctx.strokeRect(it.x-16, it.y-24, 32, 48);
+        ctx.fillStyle = '#2a2320'; // the opening through to the galley
+        ctx.fillRect(it.x-11, it.y-18, 22, 26);
+        ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 1.6;
+        ctx.strokeRect(it.x-11, it.y-18, 22, 26);
+        ctx.fillStyle = '#e9dcc0'; // a plated dish waiting to go out
+        ctx.beginPath(); ctx.ellipse(it.x, it.y+14, 10, 5, 0, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = SILHOUETTE_DARK; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(it.x, it.y+14, 10, 5, 0, 0, Math.PI*2); ctx.stroke();
+        break;
+      }
+      case 'locker': {
+        ctx.fillStyle = '#4a3f33';
+        ctx.fillRect(it.x-14, it.y-26, 28, 52); ctx.strokeRect(it.x-14, it.y-26, 28, 52);
+        ctx.strokeStyle = 'rgba(201,162,75,0.55)'; ctx.lineWidth = 1;
+        ctx.strokeRect(it.x-10, it.y-22, 20, 20);
+        ctx.strokeRect(it.x-10, it.y+2, 20, 20);
+        ctx.fillStyle = '#f4ecdc'; // folded linen on the shelf
+        ctx.fillRect(it.x-8, it.y-19, 16, 5);
+        ctx.fillRect(it.x-8, it.y+5, 16, 5);
+        break;
+      }
+      case 'washstand': {
+        ctx.fillStyle = '#5c3a24';
+        ctx.fillRect(it.x-18, it.y-4, 36, 26); ctx.strokeRect(it.x-18, it.y-4, 36, 26);
+        ctx.fillStyle = '#e9dcc0'; // enamel basins
+        ctx.beginPath(); ctx.ellipse(it.x-8, it.y+2, 7, 4.5, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(it.x+8, it.y+2, 7, 4.5, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#7a9ab3'; // mirror above
+        ctx.fillRect(it.x-12, it.y-24, 24, 18);
+        ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 1.6;
+        ctx.strokeRect(it.x-12, it.y-24, 24, 18);
+        break;
+      }
+      case 'hatch': {
+        ctx.fillStyle = '#2a2320';
+        ctx.fillRect(it.x-16, it.y-20, 32, 40); ctx.strokeRect(it.x-16, it.y-20, 32, 40);
+        ctx.strokeStyle = '#8a6f2f'; ctx.lineWidth = 2;
+        ctx.strokeRect(it.x-11, it.y-15, 22, 30);
+        ctx.fillStyle = '#c9a24b'; // wheel handle
+        ctx.beginPath(); ctx.arc(it.x, it.y, 6, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(it.x, it.y, 2, 0, Math.PI*2); ctx.fill();
+        break;
+      }
+      default: break; // 'none' — nothing extra (e.g. the stair landing, the clock)
+    }
+  }
+
+  function drawGrandClock(ctx, x, y, t){
+    ctx.save();
+    ctx.fillStyle = '#4a3221';
+    ctx.beginPath(); ctx.arc(x, y, 19, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#e9dcc0';
+    ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#c9a24b'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(x, y, 17, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = SILHOUETTE_DARK; ctx.lineWidth = 1;
+    for (let i = 0; i < 12; i++){
+      const a = (i/12)*Math.PI*2;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a)*12, y + Math.sin(a)*12);
+      ctx.lineTo(x + Math.cos(a)*14, y + Math.sin(a)*14);
+      ctx.stroke();
+    }
+    // hands track the hours the captain has left in the working day
+    const spent = (state.hoursMax - state.hours) / Math.max(state.hoursMax, 1);
+    const hourAngle = -Math.PI/2 + spent * Math.PI * 1.5;
+    const minuteAngle = -Math.PI/2 + t * 0.4;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(hourAngle)*7.5, y + Math.sin(hourAngle)*7.5); ctx.stroke();
+    ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(minuteAngle)*11, y + Math.sin(minuteAngle)*11); ctx.stroke();
+    ctx.fillStyle = '#c9a24b';
+    ctx.beginPath(); ctx.arc(x, y, 1.8, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawInteractable(ctx, it, inRange, t){
+    if (inRange){
+      const pulse = 16 + Math.sin(t*4)*2.5;
+      const g = ctx.createRadialGradient(it.x, it.y, 2, it.x, it.y, pulse+8);
+      g.addColorStop(0, 'rgba(232,148,79,0.34)');
+      g.addColorStop(1, 'rgba(232,148,79,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(it.x, it.y, pulse+8, 0, Math.PI*2); ctx.fill();
+    }
+    if (it.type === 'clock') drawGrandClock(ctx, it.x, it.y, t);
+    else drawPropShape(ctx, it, t);
+
+    if (inRange){
+      const bob = Math.sin(t*3) * 2.5;
+      ctx.font = '19px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.icon, it.x, it.y - 34 + bob);
+    }
+  }
+
+  function drawFloor(ctx, map){
+    const f = map.floor;
+    ctx.fillStyle = f.base;
+    ctx.fillRect(0, 0, map.width, map.height);
+    ctx.lineWidth = 1;
+    if (f.style === 'parquet'){
+      // alternating inlaid squares, like a first-class entrance hall
+      const size = 38;
+      for (let yy = 0; yy < map.height; yy += size){
+        for (let xx = 0; xx < map.width; xx += size){
+          const alt = ((xx/size | 0) + (yy/size | 0)) % 2 === 0;
+          ctx.fillStyle = alt ? f.plank : f.base;
+          ctx.fillRect(xx, yy, size, size);
+          ctx.strokeStyle = 'rgba(0,0,0,0.13)';
+          ctx.strokeRect(xx, yy, size, size);
+          ctx.strokeStyle = 'rgba(201,162,75,0.06)';
+          ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx+size, yy+size); ctx.stroke();
+        }
+      }
+    } else if (f.style === 'tile'){
+      // chequered saloon tiling with a fine inlaid border
+      const size = 34;
+      for (let yy = 0; yy < map.height; yy += size){
+        for (let xx = 0; xx < map.width; xx += size){
+          const alt = ((xx/size | 0) + (yy/size | 0)) % 2 === 0;
+          ctx.fillStyle = alt ? f.base : f.plank;
+          ctx.fillRect(xx, yy, size, size);
+          ctx.strokeStyle = 'rgba(0,0,0,0.10)'; ctx.lineWidth = 1;
+          ctx.strokeRect(xx, yy, size, size);
+          if (alt){
+            ctx.strokeStyle = 'rgba(201,162,75,0.14)';
+            ctx.strokeRect(xx+5, yy+5, size-10, size-10);
+          }
+        }
+      }
+    } else if (f.style === 'iron'){
+      // riveted steel deck plates, offset row to row
+      const pw = 96, ph = 52;
+      for (let yy = 0; yy < map.height; yy += ph){
+        const offset = ((yy/ph | 0) % 2) * (pw/2);
+        for (let xx = -pw; xx < map.width + pw; xx += pw){
+          const px = xx + offset;
+          ctx.fillStyle = ((xx/pw | 0) % 2 === 0) ? f.plank : f.base;
+          ctx.fillRect(px, yy, pw, ph);
+          ctx.strokeStyle = 'rgba(0,0,0,0.42)'; ctx.lineWidth = 1.4;
+          ctx.strokeRect(px, yy, pw, ph);
+          ctx.fillStyle = 'rgba(150,140,132,0.32)';
+          for (let r = 0; r < 4; r++){
+            const rx = px + 9 + r*((pw-18)/3);
+            ctx.beginPath(); ctx.arc(rx, yy + 7, 1.5, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(rx, yy + ph - 7, 1.5, 0, Math.PI*2); ctx.fill();
+          }
+        }
+      }
+    } else {
+      for (let yy = 0; yy < map.height; yy += 22){
+        ctx.fillStyle = ((yy/22 | 0) % 2 === 0) ? f.plank : f.base;
+        ctx.fillRect(0, yy, map.width, 22);
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+        ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(map.width, yy); ctx.stroke();
+      }
+    }
+  }
+
+  function drawDecor(ctx, map){
+    (map.decor || []).forEach(d => {
+      if (d.type === 'rug'){
+        ctx.fillStyle = d.color;
+        ctx.globalAlpha = 0.85;
+        ctx.fillRect(d.x, d.y, d.w, d.h);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = 'rgba(201,162,75,0.55)'; ctx.lineWidth = 2;
+        ctx.strokeRect(d.x, d.y, d.w, d.h);
+        ctx.strokeStyle = 'rgba(201,162,75,0.28)'; ctx.lineWidth = 1;
+        ctx.strokeRect(d.x+7, d.y+7, d.w-14, d.h-14);
+        ctx.beginPath();
+        ctx.ellipse(d.x+d.w/2, d.y+d.h/2, d.w*0.22, d.h*0.22, 0, 0, Math.PI*2);
+        ctx.stroke();
+      } else if (d.type === 'runner'){
+        ctx.fillStyle = 'rgba(107,44,58,0.5)';
+        ctx.fillRect(d.x, d.y, d.w, d.h);
+        ctx.strokeStyle = 'rgba(201,162,75,0.3)'; ctx.lineWidth = 1;
+        ctx.strokeRect(d.x, d.y, d.w, d.h);
+      } else if (d.type === 'grate'){
+        // an open floor grate looking down onto the stokehold below
+        ctx.fillStyle = 'rgba(12,9,8,0.75)';
+        ctx.fillRect(d.x, d.y, d.w, d.h);
+        ctx.strokeStyle = 'rgba(90,82,76,0.75)'; ctx.lineWidth = 1.6;
+        for (let gx = d.x + 6; gx < d.x + d.w; gx += 12){
+          ctx.beginPath(); ctx.moveTo(gx, d.y); ctx.lineTo(gx, d.y + d.h); ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(201,162,75,0.45)'; ctx.lineWidth = 2;
+        ctx.strokeRect(d.x, d.y, d.w, d.h);
+      }
+    });
+  }
+
+  function drawLights(ctx, map){
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    (map.lights || []).forEach(l => {
+      const g = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
+      g.addColorStop(0, `rgba(${l.color},${l.alpha})`);
+      g.addColorStop(1, `rgba(${l.color},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(l.x, l.y, l.r, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  function drawWalls(ctx, map, t){
+    const w = map.wallThickness;
+    ctx.fillStyle = map.wallColor || '#0f2038';
+    ctx.fillRect(0, 0, map.width, w);
+    ctx.fillRect(0, map.height-w, map.width, w);
+    ctx.fillRect(0, 0, w, map.height);
+    ctx.fillRect(map.width-w, 0, w, map.height);
+
+    // wainscot panelling picked out in brass
+    ctx.strokeStyle = 'rgba(201,162,75,0.32)';
+    ctx.lineWidth = 1;
+    for (let xx = 10; xx < map.width-10; xx += 44){
+      ctx.strokeRect(xx, 5, 34, w-10);
+      ctx.strokeRect(xx, map.height-w+5, 34, w-10);
+    }
+    for (let yy = 10; yy < map.height-10; yy += 44){
+      ctx.strokeRect(5, yy, w-10, 34);
+      ctx.strokeRect(map.width-w+5, yy, w-10, 34);
+    }
+
+    // a picture window onto the sea, if this room has one
+    if (map.window){
+      const win = map.window;
+      const g = ctx.createLinearGradient(0, 0, 0, w);
+      g.addColorStop(0, '#3a3f6b');
+      g.addColorStop(1, '#7a4a6e');
+      ctx.fillStyle = g;
+      ctx.fillRect(win.x, 3, win.w, w-6);
+      ctx.strokeStyle = 'rgba(201,162,75,0.8)'; ctx.lineWidth = 2;
+      ctx.strokeRect(win.x, 3, win.w, w-6);
+      ctx.strokeStyle = 'rgba(207,230,222,0.35)'; ctx.lineWidth = 1;
+      for (let i = 1; i < 4; i++){
+        ctx.beginPath();
+        ctx.moveTo(win.x + (win.w/4)*i, 3);
+        ctx.lineTo(win.x + (win.w/4)*i, w-3);
+        ctx.stroke();
+      }
+      // a slow swell rolling past outside
+      ctx.beginPath();
+      ctx.moveTo(win.x, w-8);
+      for (let px = 0; px <= win.w; px += 8){
+        ctx.lineTo(win.x + px, w - 8 + Math.sin((px/22) + t*0.9)*1.6);
+      }
+      ctx.stroke();
+    }
+
+    // portholes
+    (map.portholes || []).forEach(p => {
+      const px = p.side === 'left' ? w/2 : map.width - w/2;
+      const py = p.at;
+      ctx.fillStyle = '#1a3350';
+      ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = 'rgba(201,162,75,0.8)'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle = 'rgba(207,230,222,0.22)';
+      ctx.beginPath(); ctx.arc(px - 2, py - 2, 3, 0, Math.PI*2); ctx.fill();
+    });
+
+    ctx.strokeStyle = 'rgba(201,162,75,0.6)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(w/2, w/2, map.width-w, map.height-w);
+  }
+
+  function drawAtmosphere(ctx, map, t){
+    const tod = timeOfDay();
+    ctx.save();
+    ctx.fillStyle = `rgba(${tod.tint},${tod.alpha})`;
+    ctx.fillRect(0, 0, map.width, map.height);
+
+    // dust drifting through the lamplight
+    ctx.fillStyle = 'rgba(255,240,210,0.30)';
+    dustMotes.forEach(m => {
+      const dx = m.x + Math.sin(t*0.35 + m.phase) * m.drift;
+      const dy = (m.y + t * m.drift * 0.5) % map.height;
+      ctx.beginPath(); ctx.arc(dx, dy, m.r, 0, Math.PI*2); ctx.fill();
+    });
+
+    const vg = ctx.createRadialGradient(
+      map.width/2, map.height/2, Math.min(map.width, map.height)*0.32,
+      map.width/2, map.height/2, Math.max(map.width, map.height)*0.72
+    );
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.45)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, map.width, map.height);
+    ctx.restore();
+  }
+
+  function drawScene(){
+    if (!mapCanvasEl) return;
+    const ctx = mapCanvasEl.getContext('2d');
+    if (!ctx) return;
+    const map = currentMapDef();
+    const t = performance.now()/1000;
+
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, map.width, map.height);
+
+    if (staticLayer){
+      ctx.drawImage(staticLayer, 0, 0, map.width, map.height);
+    } else {
+      drawFloor(ctx, map);
+      drawDecor(ctx, map);
+      drawLights(ctx, map);
+    }
+
+    map.obstacles.forEach(o => drawObstacle(ctx, o, t));
+    map.interactables.forEach(it => drawInteractable(ctx, it, it === activeInteractable, t));
+
+    // Depth-sort people so anyone standing lower on screen draws in front.
+    const actors = npcRuntime.map(n => ({
+      y: n.y, draw: () => drawCharacter(ctx, n.x, n.y, {
+        color: n.def.color, facing: n.facing, walkPhase: n.walkPhase,
+        isMoving: n.isMoving, hat: n.def.hat, small: n.def.small, crew: n.def.crew
+      })
+    }));
+    actors.push({
+      y: player.y, draw: () => drawCharacter(ctx, player.x, player.y, {
+        color: PLAYER_COLOR, facing: player.facing, walkPhase: player.walkPhase,
+        isMoving: player.isMoving, hat: true, crew: true
+      })
+    });
+    actors.sort((a, b) => a.y - b.y).forEach(a => a.draw());
+
+    // A ring under whoever you're about to talk to, so it's obvious who it is.
+    if (activeInteractable && activeInteractable.type === 'npc'){
+      const n = activeInteractable.npc;
+      ctx.strokeStyle = 'rgba(232,148,79,0.75)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(n.x, n.y + 1, 13, 4.5, 0, 0, Math.PI*2); ctx.stroke();
+      ctx.font = '11px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(242,233,216,0.95)';
+      ctx.fillText(n.def.name, n.x, n.y - 40);
+    }
+
+    drawWalls(ctx, map, t);
+    drawAtmosphere(ctx, map, t);
+  }
+
+  function gameLoop(ts){
+    if (!lastFrameTime) lastFrameTime = ts;
+    const dt = Math.min((ts - lastFrameTime) / 1000, 0.05);
+    lastFrameTime = ts;
+    updatePlayer(dt);
+    if (modalOverlay.classList.contains('hidden')) updateNpcs(dt);
+    drawScene();
+    updateInteractionPrompt();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Expanded mode lets the map fill the whole viewport, which matters a lot on
+  // a wide screen where the in-column canvas is only a fraction of the width.
+  let mapExpanded = false;
+  function setMapExpanded(on){
+    const panel = document.getElementById('deckPanel');
+    const btn = document.getElementById('expandMapBtn');
+    if (!panel) return;
+    mapExpanded = on;
+    panel.classList.toggle('expanded', on);
+    document.body.style.overflow = on ? 'hidden' : '';
+    if (btn) btn.textContent = on ? '⤡ Close' : '⛶ Expand';
+  }
+  function toggleMapExpanded(){ setMapExpanded(!mapExpanded); }
+
+  function bindMapInput(){
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      if (MOVE_KEYS[k]){ heldKeys.add(MOVE_KEYS[k]); e.preventDefault(); }
+      else if (k === 'e'){ handleInteract(); e.preventDefault(); }
+      else if (k === 'f' && modalOverlay.classList.contains('hidden')){ toggleMapExpanded(); e.preventDefault(); }
+      else if (k === 'm'){ toggleMusic(); e.preventDefault(); }
+      else if (k === 'escape' && mapExpanded && modalOverlay.classList.contains('hidden')){ setMapExpanded(false); e.preventDefault(); }
+    });
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase();
+      if (MOVE_KEYS[k]) heldKeys.delete(MOVE_KEYS[k]);
+    });
+    document.querySelectorAll('.dpad-btn').forEach(btn => {
+      const dir = btn.dataset.dir;
+      const press = (e) => { e.preventDefault(); heldKeys.add(dir); };
+      const release = (e) => { e.preventDefault(); heldKeys.delete(dir); };
+      btn.addEventListener('touchstart', press, { passive:false });
+      btn.addEventListener('touchend', release);
+      btn.addEventListener('mousedown', press);
+      btn.addEventListener('mouseup', release);
+      btn.addEventListener('mouseleave', release);
+    });
+    const touchInteractBtn = document.getElementById('touchInteractBtn');
+    if (touchInteractBtn) touchInteractBtn.addEventListener('click', handleInteract);
+    const expandBtn = document.getElementById('expandMapBtn');
+    if (expandBtn) expandBtn.addEventListener('click', toggleMapExpanded);
+  }
+
+  /* ================================ 7c. MUSIC =================================== */
+  // Background music loops from an external file sitting next to this HTML
+  // (ss-mat-rague-theme.mp3 — swap that file to change the track; nothing else
+  // needs editing). Browsers refuse to start audio before the user has
+  // interacted with the page, so playback is armed on the first click or
+  // keypress. If the file is missing the game just runs silent.
+
+  const MUSIC_VOLUME = 0.35;
+  const bgmEl = document.getElementById('bgm');
+  let musicReady = false;      // has a user gesture happened yet
+  let musicAvailable = true;   // did the file actually load
+
+  function fadeAudioTo(target, ms){
+    if (!bgmEl) return;
+    const from = bgmEl.volume;
+    const start = performance.now();
+    function step(now){
+      const k = Math.min((now - start) / ms, 1);
+      bgmEl.volume = clamp(from + (target - from) * k, 0, 1);
+      if (k < 1) requestAnimationFrame(step);
+      else if (target === 0) bgmEl.pause();
+    }
+    requestAnimationFrame(step);
+  }
+
+  function tryStartMusic(){
+    if (!bgmEl || !musicAvailable || state.musicOn === false) return;
+    if (!bgmEl.paused) return;
+    bgmEl.volume = 0;
+    const p = bgmEl.play();
+    if (p && typeof p.catch === 'function'){
+      p.then(() => fadeAudioTo(MUSIC_VOLUME, 1400))
+       .catch(() => { /* blocked or unplayable — stay silent, toggle still works */ });
+    } else {
+      fadeAudioTo(MUSIC_VOLUME, 1400);
+    }
+  }
+
+  function updateMusicButton(){
+    const btn = document.getElementById('musicBtn');
+    if (!btn) return;
+    if (!musicAvailable){
+      btn.textContent = '♪ No audio';
+      btn.title = 'ss-mat-rague-theme.mp3 was not found next to this file';
+      btn.classList.add('muted');
+      return;
+    }
+    const on = state.musicOn !== false;
+    btn.textContent = on ? '♪ Music' : '♪ Muted';
+    btn.classList.toggle('muted', !on);
+    btn.title = on ? "Mute the ship's music (M)" : "Unmute the ship's music (M)";
+  }
+
+  function toggleMusic(){
+    state.musicOn = state.musicOn === false;
+    if (state.musicOn) tryStartMusic();
+    else fadeAudioTo(0, 500);
+    updateMusicButton();
+    saveGame();
+  }
+
+  function initMusic(){
+    if (!bgmEl) return;
+    bgmEl.addEventListener('error', () => { musicAvailable = false; updateMusicButton(); });
+    // Arm playback on the first gesture of any kind, then stop listening.
+    const arm = () => {
+      if (musicReady) return;
+      musicReady = true;
+      tryStartMusic();
+      window.removeEventListener('pointerdown', arm);
+      window.removeEventListener('keydown', arm);
+    };
+    window.addEventListener('pointerdown', arm);
+    window.addEventListener('keydown', arm);
+    const btn = document.getElementById('musicBtn');
+    if (btn) btn.addEventListener('click', toggleMusic);
+    updateMusicButton();
+  }
+
+  /* ================================ 8. ACTIONS ================================== */
+
+  function doRoom(roomId){
+    const room = ROOMS.find(r => r.id === roomId);
+    if (!room) return;
+    if (state.hours < room.cost.hours){ showToast('Not enough hours left today.'); return; }
+    for (const key in room.cost){
+      if (key === 'hours') continue;
+      if ((state[key]||0) < room.cost[key]){ showToast(room.shortMessage || 'Not enough resources for that.'); return; }
+    }
+    state.hours -= room.cost.hours;
+    for (const key in room.cost){ if (key !== 'hours') state[key] -= room.cost[key]; }
+    if (!state.actedToday.includes(room.id)) state.actedToday.push(room.id);
+
+    if (room.id === 'purser'){
+      render();
+      openPurserRequest();
+      return;
+    }
+    addLog(room.action(), 'event');
+    render();
+  }
+
+  function openPurserRequest(){
+    const req = pickOne(REQUESTS);
+    openModal("Purser's Office", `<p>${req.text}</p>`, req.choices.map(c => ({
+      label: c.label,
+      primary: false,
+      onClick: () => {
+        applyEffects(c.effects);
+        addLog(c.result, 'story');
+        closeModal();
+        render();
+      }
+    })));
+  }
+
+  function openShipyard(){
+    const rows = UPGRADES.map(u => {
+      const owned = state.upgrades.includes(u.id);
+      const afford = state.gold >= u.cost;
+      return `<div class="upgrade-row">
+        <div class="upgrade-info">
+          <p class="upgrade-name">${u.name}</p>
+          <p class="upgrade-desc">${u.desc}</p>
+        </div>
+        <button class="btn ${owned ? 'ghost' : 'secondary'} upgrade-btn" data-id="${u.id}" ${owned || !afford ? 'disabled' : ''}>
+          ${owned ? 'Installed ✓' : `${u.cost}🪙`}
+        </button>
+      </div>`;
+    }).join('');
+    openModal('The Shipyard', `<p class="modal-intro">Spend your earnings on lasting improvements to the SS Mat Rague.</p><div class="upgrade-list">${rows}</div>`, [
+      { label:'Close', primary:true, onClick: closeModal }
+    ]);
+    modalBox.querySelectorAll('.upgrade-btn').forEach(btn => {
+      btn.addEventListener('click', () => buyUpgrade(btn.dataset.id));
+    });
+  }
+
+  function openDirectory(){
+    const rows = ROOMS.map(r => {
+      let affordable = state.hours >= r.cost.hours;
+      if (affordable){
+        for (const key in r.cost){
+          if (key === 'hours') continue;
+          if ((state[key]||0) < r.cost[key]){ affordable = false; break; }
+        }
+      }
+      const costParts = [];
+      if (r.cost.gold) costParts.push(`${r.cost.gold}🪙`);
+      if (r.cost.food) costParts.push(`${r.cost.food}🍞`);
+      if (r.cost.fuel) costParts.push(`${r.cost.fuel}⛽`);
+      costParts.push(`${r.cost.hours}⏳`);
+      return `<div class="upgrade-row">
+        <div class="upgrade-info">
+          <p class="upgrade-name">${r.icon} ${r.name}</p>
+          <p class="upgrade-desc">${r.desc}</p>
+        </div>
+        <button class="btn secondary directory-btn" data-id="${r.id}" ${affordable ? '' : 'disabled'}>
+          ${r.actionLabel}<br><span class="room-cost">${costParts.join(' · ')}</span>
+        </button>
+      </div>`;
+    }).join('');
+    openModal("Ship's Directory", `<p class="modal-intro">A click-to-do list of every department, if you'd rather not walk there.</p><div class="upgrade-list">${rows}</div>`, [
+      { label:'Close', primary:true, onClick: closeModal }
+    ]);
+    modalBox.querySelectorAll('.directory-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        doRoom(id);
+        if (id !== 'purser') openDirectory(); // refresh in place; purser opens its own request dialog instead
+      });
+    });
+  }
+
+  function buyUpgrade(id){
+    const u = UPGRADES.find(x => x.id === id);
+    if (!u || state.upgrades.includes(id) || state.gold < u.cost) return;
+    state.gold -= u.cost;
+    state.upgrades.push(id);
+    u.apply();
+    addLog(`Shipyard: ${u.name} installed.`, 'system');
+    render();
+    saveGame();
+    openShipyard();
+  }
+
+  function confirmNewVoyage(){
+    openModal('Start a New Voyage?', `<p>Your current voyage — Day ${state.day}, ${state.gold}g in the ship's account — will be lost for good.</p>`, [
+      { label:'Cancel', primary:false, onClick: closeModal },
+      { label:'Start New Voyage', primary:true, onClick: () => {
+          closeModal();
+          const keepMusic = state.musicOn;
+          state = defaultState();
+          state.musicOn = keepMusic; // a device preference, not voyage progress
+          goToMap('mainHall');
+          updateMusicButton();
+          render();
+          saveGame();
+          showIntro();
+        }
+      }
+    ]);
+  }
+
+  function showGameOver(){
+    openModal('The Voyage Ends', `<p>The books don't lie: the SS Mat Rague has run too deep into debt. The Malek Sepai Cruise Line recalls her to port, and your command along with her.</p><p class="modal-hint">Reached Day ${state.day} · Final reputation ${state.reputation.toFixed(1)} ★</p>`, [
+      { label:'Start a New Voyage', primary:true, onClick: () => {
+          closeModal();
+          const keepMusic = state.musicOn;
+          state = defaultState();
+          state.musicOn = keepMusic; // a device preference, not voyage progress
+          goToMap('mainHall');
+          updateMusicButton();
+          render();
+          saveGame();
+          showIntro();
+        }
+      }
+    ]);
+  }
+
+  function showIntro(){
+    openModal("Captain's Log — Day 1", `
+      <p>The <strong>SS Mat Rague</strong> sits proud at her berth, brass fittings catching the morning light — pride of the Malek Sepai Cruise Line, finest ship they say to ever leave port.</p>
+      <p>Today, she is yours to command.</p>
+      <p>Keep the passengers happy. Keep the ship sound. Keep the voyage moving forward — one day, and one decision, at a time.</p>
+      <p class="modal-hint">Each day you have a handful of working hours to spend across the ship's departments. Choose wisely, then end the day to see how the voyage unfolds.</p>
+    `, [
+      { label:'Take the Helm', primary:true, onClick: () => {
+          closeModal();
+          addLog('The SS Mat Rague casts off. Day 1 begins.', 'system');
+          render();
+          saveGame();
+        }
+      }
+    ]);
+  }
+
+  /* ============================= 9. DAY RESOLUTION =============================== */
+
+  function endDayFlow(){
+    if (state.hours > 0){
+      openModal('Still Time Left', `<p>You still have <strong>${state.hours}</strong> working hour${state.hours===1?'':'s'} left today. End the day anyway?</p>`, [
+        { label:'Keep Working', primary:false, onClick: closeModal },
+        { label:'End the Day', primary:true, onClick: () => { closeModal(); performEndDay(); } }
+      ]);
+    } else {
+      performEndDay();
+    }
+  }
+
+  function performEndDay(){
+    const report = resolveDay();
+    render();
+    saveGame();
+    showDayReport(report);
+  }
+
+  function resolveDay(){
+    const finishedDay = state.day;
+    const event = pickEvent();
+    const eventResult = EVENT_RESOLVERS[event.id]();
+    applyEffects(eventResult.effects);
+
+    const fareIncome = Math.round(state.passengers * 5 * (state.happiness/100));
+    const wages = 45;
+    state.gold += fareIncome - wages;
+
+    state.happiness = clamp(state.happiness - 4, 0, 100);
+    state.shipCondition = clamp(state.shipCondition - 3, 0, 100);
+
+    if (state.happiness >= 80) state.reputation = clamp(state.reputation + 0.05, 0, 5);
+    else if (state.happiness < 40) state.reputation = clamp(state.reputation - 0.08, 0, 5);
+
+    state.day += 1;
+    state.hours = state.hoursMax;
+    state.lookout = 0;
+    state.actedToday = [];
+    state.npcTalks = {};
+    state.food = clamp(state.food + 20, 0, state.foodMax);
+    state.fuel = clamp(state.fuel + 20, 0, state.fuelMax);
+
+    let passengerDelta = 0;
+    if (state.day % 3 === 0){
+      const before = state.passengers;
+      state.passengers = clamp(state.passengers + Math.round((state.reputation-3)*2), 10, state.passengersMax);
+      passengerDelta = state.passengers - before;
+    }
+
+    addLog(eventResult.text, 'event');
+    addLog(`Fares collected: +${fareIncome}g · Crew wages: -${wages}g`, 'finance');
+
+    const bankrupt = state.gold < -150;
+    if (bankrupt) addLog("The ship's accounts have gone dangerously into the red.", 'warn');
+
+    return { finishedDay, eventText:eventResult.text, fareIncome, wages, passengerDelta, bankrupt };
+  }
+
+  function showDayReport(report){
+    const net = report.fareIncome - report.wages;
+    const extra = report.passengerDelta
+      ? `<p class="modal-hint">${report.passengerDelta > 0 ? 'New passengers have booked passage: +' : 'A few passengers have cancelled: '}${report.passengerDelta}.</p>`
+      : '';
+    openModal(`Captain's Log — Day ${report.finishedDay}`, `
+      <p>${report.eventText}</p>
+      <div class="report-finance">
+        <span>Fares collected</span><span>+${report.fareIncome}g</span>
+        <span>Crew wages</span><span>-${report.wages}g</span>
+        <span class="report-net">Net for the day</span><span class="report-net">${net>=0?'+':''}${net}g</span>
+      </div>
+      ${extra}
+      ${report.bankrupt ? '' : `<p class="modal-hint">Day ${state.day} begins.</p>`}
+    `, [
+      { label: report.bankrupt ? 'See the Reckoning' : 'Continue', primary:true, onClick: () => {
+          closeModal();
+          if (report.bankrupt) showGameOver();
+          else checkAndShowStoryBeat();
+        }
+      }
+    ]);
+  }
+
+  function checkAndShowStoryBeat(){
+    const beat = STORY_BEATS.find(b => b.day === state.day && !state.storyFlags['beat_'+b.id]);
+    if (beat){
+      state.storyFlags['beat_'+beat.id] = true;
+      showStoryBeat(beat);
+      saveGame();
+    }
+  }
+
+  function showStoryBeat(beat){
+    const body = beat.bodyFn ? beat.bodyFn() : beat.body;
+    if (beat.choices){
+      openModal(beat.title, body, beat.choices.map(c => ({
+        label:c.label, primary:false,
+        onClick:() => { applyEffects(c.effects); addLog(c.result,'story'); closeModal(); render(); saveGame(); }
+      })));
+    } else {
+      openModal(beat.title, body, [{ label:'Continue', primary:true, onClick: closeModal }]);
+    }
+  }
+
+  /* ================================== 10. INIT =================================== */
+
+  function bindStaticButtons(){
+    document.getElementById('directoryBtn').addEventListener('click', openDirectory);
+    document.getElementById('shipyardBtn').addEventListener('click', openShipyard);
+    document.getElementById('endDayBtn').addEventListener('click', endDayFlow);
+    document.getElementById('newVoyageBtn').addEventListener('click', confirmNewVoyage);
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) closeModal();
+    });
+  }
+
+  async function init(){
+    const loaded = await loadGame();
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    const vTag = document.getElementById('versionTag');
+    if (vTag) vTag.textContent = 'Version ' + GAME_VERSION;
+
+    player.map = MAPS[state.currentMap] ? state.currentMap : 'mainHall';
+    const spawn = currentMapDef().spawn;
+    player.x = spawn.x;
+    player.y = spawn.y;
+    spawnNpcsForMap(player.map);
+    updateMapMeta();
+
+    bindStaticButtons();
+    bindMapInput();
+    initMusic();
+    initHeroAnimations();
+    render();
+    requestAnimationFrame(gameLoop);
+    if (!loaded) showIntro();
+    else showToast(`Welcome back, Captain — Day ${state.day}.`);
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
